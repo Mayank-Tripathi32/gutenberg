@@ -17,6 +17,7 @@ import {
 	getClientIdsWithDescendants,
 	isNavigationMode,
 	getBlockRootClientId,
+	__unstableGetEditorMode,
 } from './selectors';
 import {
 	checkAllowListRecursive,
@@ -116,7 +117,7 @@ export const getEnabledClientIdsTree = createSelector(
 		state.blockEditingModes,
 		state.settings.templateLock,
 		state.blockListSettings,
-		state.editorMode,
+		__unstableGetEditorMode( state ),
 		state.zoomLevel,
 		getSectionRootClientId( state ),
 	]

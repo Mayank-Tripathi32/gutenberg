@@ -11,6 +11,7 @@ import { selectBlockPatternsKey } from './private-keys';
 import { unlock } from '../lock-unlock';
 import { STORE_NAME } from './constants';
 import { getSectionRootClientId } from './private-selectors';
+import { __unstableGetEditorMode } from './selectors';
 
 export const isFiltered = Symbol( 'isFiltered' );
 const parsedPatternCache = new WeakMap();
@@ -117,7 +118,7 @@ export function getInsertBlockTypeDependants( state, rootClientId ) {
 		state.settings.allowedBlockTypes,
 		state.settings.templateLock,
 		state.blockEditingModes,
-		state.editorMode,
+		__unstableGetEditorMode( state ),
 		getSectionRootClientId( state ),
 	];
 }
