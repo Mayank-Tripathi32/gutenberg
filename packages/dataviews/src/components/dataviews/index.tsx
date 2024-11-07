@@ -68,7 +68,6 @@ export default function DataViews< Item >( {
 	header,
 }: DataViewsProps< Item > ) {
 	const [ selectionState, setSelectionState ] = useState< string[] >( [] );
-	const [ density, setDensity ] = useState< number >( 0 );
 	const isUncontrolled =
 		selectionProperty === undefined || onChangeSelection === undefined;
 	const selection = isUncontrolled ? selectionState : selectionProperty;
@@ -110,7 +109,6 @@ export default function DataViews< Item >( {
 				openedFilter,
 				setOpenedFilter,
 				getItemId,
-				density,
 			} }
 		>
 			<div className="dataviews-wrapper">
@@ -142,8 +140,6 @@ export default function DataViews< Item >( {
 					>
 						<DataViewsViewConfig
 							defaultLayouts={ defaultLayouts }
-							density={ density }
-							setDensity={ setDensity }
 						/>
 						{ header }
 					</HStack>
