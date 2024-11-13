@@ -28,6 +28,16 @@ import type { SelectionOrUpdater } from '../../private-types';
 
 type ItemWithId = { id: string };
 
+type DraggedType = { index: number; id: string; isVisible: boolean };
+
+type CustomViewFields = {
+	id: string;
+	label: string;
+	index: number;
+	isVisible: boolean;
+	isHidable: boolean;
+};
+
 type DataViewsProps< Item > = {
 	view: View;
 	onChangeView: ( view: View ) => void;
@@ -69,6 +79,21 @@ export default function DataViews< Item >( {
 }: DataViewsProps< Item > ) {
 	const [ selectionState, setSelectionState ] = useState< string[] >( [] );
 	const [ density, setDensity ] = useState< number >( 0 );
+
+	const [ draggedSource, setDraggedSource ] = useState< DraggedType | null >(
+		null
+	);
+	const [ draggedTarget, setDraggedTarget ] = useState< DraggedType | null >(
+		null
+	);
+
+	const [ visibleFields, setVisibleFields ] = useState< CustomViewFields[] >(
+		[]
+	);
+	const [ hiddenFields, setHiddenFields ] = useState< CustomViewFields[] >(
+		[]
+	);
+
 	const isUncontrolled =
 		selectionProperty === undefined || onChangeSelection === undefined;
 	const selection = isUncontrolled ? selectionState : selectionProperty;
@@ -111,6 +136,14 @@ export default function DataViews< Item >( {
 				setOpenedFilter,
 				getItemId,
 				density,
+				draggedSource,
+				setDraggedSource,
+				draggedTarget,
+				setDraggedTarget,
+				visibleFields,
+				setVisibleFields,
+				hiddenFields,
+				setHiddenFields,
 			} }
 		>
 			<div className="dataviews-wrapper">

@@ -2,6 +2,16 @@
  * External dependencies
  */
 import type { ChangeEvent } from 'react';
+/**
+ * WordPress dependencies
+ */
+import {
+	useEffect,
+	useRef,
+	memo,
+	useContext,
+	useMemo,
+} from '@wordpress/element';
 
 /**
  * WordPress dependencies
@@ -25,8 +35,7 @@ import {
 	BaseControl,
 } from '@wordpress/components';
 import { __, _x, sprintf } from '@wordpress/i18n';
-import { memo, useContext, useMemo } from '@wordpress/element';
-import { chevronDown, chevronUp, cog, seen, unseen } from '@wordpress/icons';
+import { dragHandle, cog, seen, unseen } from '@wordpress/icons';
 import warning from '@wordpress/warning';
 import { useInstanceId } from '@wordpress/compose';
 
@@ -46,7 +55,7 @@ import {
 	getVisibleFieldIds,
 	getHiddenFieldIds,
 } from '../../dataviews-layouts';
-import type { SupportedLayouts, View, Field } from '../../types';
+import { type SupportedLayouts, type View, type Field } from '../../types';
 import DataViewsContext from '../dataviews-context';
 import { unlock } from '../../lock-unlock';
 import DensityPicker from '../../dataviews-layouts/grid/density-picker';
@@ -252,84 +261,80 @@ function FieldItem( {
 	fields,
 	view,
 	onChangeView,
+	onDragStart,
+	onDragOver,
+	onDrop,
 }: {
 	field: FieldItemProps;
 	fields: Field< any >[];
 	view: View;
 	onChangeView: ( view: View ) => void;
+	onDragStart: ( view: number, id: string, isVisible: boolean ) => void;
+	onDragOver: ( view: number, id: string, isVisible: boolean ) => void;
+	onDrop: () => void;
 } ) {
 	const visibleFieldIds = getVisibleFieldIds( view, fields );
+	const rowRef = useRef( null );
+
+	const handleDragStart = ( e: React.DragEvent ) => {
+		if ( onDragStart ) {
+			e.stopPropagation();
+			onDragStart( index, id, isVisible ); // Pass index to the parent for managing drag state
+			if ( rowRef.current ) {
+				// Set the current element as the drag image
+				const dragImage = rowRef.current;
+				e.dataTransfer.setDragImage( dragImage, 25, 50 );
+			}
+		}
+	};
+
+	// Handle drag over event.
+	const handleDragOver = ( e: React.DragEvent ) => {
+		e.preventDefault(); // This is important for allowing the drop
+		if ( onDragOver ) {
+			onDragOver( index, id, isVisible ); // Notify the parent when a field is dragged over
+		}
+	};
 
 	return (
-		<Item key={ id }>
+		<Item
+			key={ id }
+			ref={ rowRef }
+			className="dataviews-field-control__draggable-item"
+			onDrop={ onDrop }
+			onDragStart={ handleDragStart }
+			onDragOver={ handleDragOver }
+		>
 			<HStack
 				expanded
 				className={ `dataviews-field-control__field dataviews-field-control__field-${ id }` }
 			>
+				{ view.type === LAYOUT_TABLE && (
+					<Button
+						draggable={ view.type === LAYOUT_TABLE } // Make it draggable only when the field is visible
+						accessibleWhenDisabled
+						size="compact"
+						variant="tertiary"
+						className="dataviews-field-control__draggable-icon"
+						icon={ dragHandle }
+						label={ sprintf(
+							/* translators: %s: field label */
+							__( 'Drag %s' ),
+							label
+						) }
+					/>
+				) }
+
 				<span>{ label }</span>
 				<HStack
 					justify="flex-end"
 					expanded={ false }
-					className="dataviews-field-control__actions"
+					className={
+						view.type !== LAYOUT_TABLE
+							? 'dataviews-field-control__actions'
+							: ''
+					}
 				>
-					{ view.type === LAYOUT_TABLE && isVisible && (
-						<>
-							<Button
-								disabled={ index < 1 }
-								accessibleWhenDisabled
-								size="compact"
-								onClick={ () => {
-									onChangeView( {
-										...view,
-										fields: [
-											...( visibleFieldIds.slice(
-												0,
-												index - 1
-											) ?? [] ),
-											id,
-											visibleFieldIds[ index - 1 ],
-											...visibleFieldIds.slice(
-												index + 1
-											),
-										],
-									} );
-								} }
-								icon={ chevronUp }
-								label={ sprintf(
-									/* translators: %s: field label */
-									__( 'Move %s up' ),
-									label
-								) }
-							/>
-							<Button
-								disabled={ index >= visibleFieldIds.length - 1 }
-								accessibleWhenDisabled
-								size="compact"
-								onClick={ () => {
-									onChangeView( {
-										...view,
-										fields: [
-											...( visibleFieldIds.slice(
-												0,
-												index
-											) ?? [] ),
-											visibleFieldIds[ index + 1 ],
-											id,
-											...visibleFieldIds.slice(
-												index + 2
-											),
-										],
-									} );
-								} }
-								icon={ chevronDown }
-								label={ sprintf(
-									/* translators: %s: field label */
-									__( 'Move %s down' ),
-									label
-								) }
-							/>{ ' ' }
-						</>
-					) }
 					<Button
 						className="dataviews-field-control__field-visibility-button"
 						disabled={ ! isHidable }
@@ -356,7 +361,7 @@ function FieldItem( {
 								}
 							}, 50 );
 						} }
-						icon={ isVisible ? unseen : seen }
+						icon={ isVisible ? seen : unseen }
 						label={
 							isVisible
 								? sprintf(
@@ -378,7 +383,19 @@ function FieldItem( {
 }
 
 function FieldControl() {
-	const { view, fields, onChangeView } = useContext( DataViewsContext );
+	const {
+		view,
+		fields,
+		onChangeView,
+		draggedSource,
+		setDraggedSource,
+		draggedTarget,
+		setDraggedTarget,
+		visibleFields,
+		setVisibleFields,
+		hiddenFields,
+		setHiddenFields,
+	} = useContext( DataViewsContext );
 
 	const visibleFieldIds = useMemo(
 		() => getVisibleFieldIds( view, fields ),
@@ -393,43 +410,240 @@ function FieldControl() {
 		[ view ]
 	);
 
-	const visibleFields = fields
-		.filter( ( { id } ) => visibleFieldIds.includes( id ) )
-		.map( ( { id, label, enableHiding } ) => {
-			return {
-				id,
-				label,
-				index: visibleFieldIds.indexOf( id ),
-				isVisible: true,
-				isHidable: notHidableFieldIds.includes( id )
-					? false
-					: enableHiding,
-			};
-		} );
-	if ( view.type === LAYOUT_TABLE && view.layout?.combinedFields ) {
-		view.layout.combinedFields.forEach( ( { id, label } ) => {
-			visibleFields.push( {
-				id,
-				label,
-				index: visibleFieldIds.indexOf( id ),
-				isVisible: true,
-				isHidable: notHidableFieldIds.includes( id ),
-			} );
-		} );
-	}
-	visibleFields.sort( ( a, b ) => a.index - b.index );
+	useEffect( () => {
+		setVisibleFields(
+			fields
+				.filter( ( { id } ) => visibleFieldIds.includes( id ) )
+				.map( ( { id, label, enableHiding } ) => {
+					return {
+						id,
+						label,
+						index: visibleFieldIds.indexOf( id ),
+						isVisible: true,
+						isHidable: notHidableFieldIds.includes( id )
+							? false
+							: enableHiding,
+					};
+				} )
+		);
+	}, [ fields, visibleFieldIds, setVisibleFields, notHidableFieldIds ] );
 
-	const hiddenFields = fields
-		.filter( ( { id } ) => hiddenFieldIds.includes( id ) )
-		.map( ( { id, label, enableHiding }, index ) => {
-			return {
+	useEffect( () => {
+		setHiddenFields( ( prev ) => {
+			const newIds = prev.filter(
+				( e ) => ! visibleFieldIds.includes( e.id )
+			);
+
+			// Add missing fields to newIds
+			hiddenFieldIds.forEach( ( id ) => {
+				// Check if the ID already exists in newIds
+				const findIfNotExists = newIds.find( ( e ) => e.id === id );
+
+				if ( ! findIfNotExists ) {
+					// Find the item in fields that matches the missing ID
+					const item = fields.find( ( e ) => e.id === id );
+
+					if ( ! item ) {
+						return; // Skip if the item isn't found in fields
+					}
+
+					// Add the missing item to newIds with proper properties
+					newIds.push( {
+						id,
+						label: item.label,
+						index: newIds.length, // Set unique index based on current length of newIds
+						isVisible: false,
+						isHidable: item.enableHiding,
+					} );
+				}
+			} );
+
+			return newIds;
+		} );
+	}, [ fields, hiddenFieldIds, setHiddenFields, visibleFieldIds ] );
+
+	const handleDragStart = ( index: number, id: string, isVisible: boolean ) =>
+		setDraggedSource( {
+			index,
+			id,
+			isVisible,
+		} );
+
+	const handleDragOver = (
+		index: number,
+		id: string,
+		isVisible: boolean
+	) => {
+		setDraggedTarget( {
+			index,
+			id,
+			isVisible,
+		} );
+	};
+
+	const handleDrop = () => {
+		if ( ! draggedSource || ! draggedTarget ) {
+			return;
+		}
+
+		// Check if moving to same position as current index then do nothing.
+		if (
+			draggedSource.index === draggedTarget.index &&
+			draggedSource.isVisible === draggedTarget.isVisible
+		) {
+			return;
+		}
+
+		// If same table switch is happening then.
+		if (
+			draggedSource.isVisible === draggedTarget.isVisible &&
+			! draggedSource.isVisible
+		) {
+			setHiddenFields( ( prevFields ) => {
+				// Create a copy of the array to avoid mutating state directly
+				const updatedFields = [ ...prevFields ];
+
+				// Remove the element from its original position
+				const [ element ] = updatedFields.splice(
+					draggedSource.index,
+					1
+				);
+
+				// Insert the element at the target index
+				updatedFields.splice( draggedTarget.index, 0, element );
+
+				// Update indices to reflect the new order
+				const reorderedFields = updatedFields.map(
+					( field, index ) => ( {
+						...field,
+						index, // Assign new index based on position
+					} )
+				);
+
+				return reorderedFields;
+			} );
+		}
+
+		if (
+			draggedSource.isVisible === draggedTarget.isVisible &&
+			draggedSource.isVisible
+		) {
+			const updatedFields = [ ...visibleFields ];
+			const [ element ] = updatedFields.splice( draggedSource.index, 1 );
+			updatedFields.splice( draggedTarget.index, 0, element );
+			// Update the view with new visible field order
+			onChangeView( {
+				...view,
+				fields: updatedFields.map( ( field ) => field.id ),
+			} );
+		}
+
+		// dont allow toggling and exit.
+		if ( notHidableFieldIds.includes( draggedSource.id ) ) {
+			setDraggedSource( null );
+			setDraggedTarget( null );
+			return;
+		}
+
+		// Move from 'hidden' to 'visible'
+		if ( ! draggedSource.isVisible && draggedTarget.isVisible ) {
+			// Update hidden fields
+			setHiddenFields( ( prevFields ) => {
+				const updatedFields = [ ...prevFields ];
+				// Remove the element from hidden fields
+				updatedFields.splice( draggedSource.index, 1 );
+
+				// Update the indices in hidden fields
+				const reorderedHiddenFields = updatedFields.map(
+					( field, index ) => ( {
+						...field,
+						index,
+					} )
+				);
+
+				return reorderedHiddenFields;
+			} );
+
+			// Update visible fields by adding the dragged item
+			const updatedVisibleFields = [ ...visibleFields ];
+			const item = hiddenFields[ draggedSource.index ];
+
+			// Insert into visible fields at the target index
+			updatedVisibleFields.splice( draggedTarget.index, 0, {
+				...item,
+				index: draggedTarget.index,
+			} );
+
+			// Update the view with the new visible field order
+			onChangeView( {
+				...view,
+				fields: updatedVisibleFields.map( ( field ) => field.id ),
+			} );
+		}
+
+		// Move from 'visible' to 'hidden'
+		if ( draggedSource.isVisible && ! draggedTarget.isVisible ) {
+			// Update visible fields
+			const updatedVisibleFields = [ ...visibleFields ];
+			const [ element ] = updatedVisibleFields.splice(
+				draggedSource.index,
+				1
+			);
+
+			// Update indexes in visible fields
+			const reorderedVisibleFields = updatedVisibleFields.map(
+				( field, index ) => ( {
+					...field,
+					index,
+				} )
+			);
+
+			onChangeView( {
+				...view,
+				fields: reorderedVisibleFields.map( ( field ) => field.id ),
+			} );
+
+			// Update hidden fields by adding the dragged item
+			setHiddenFields( ( prevFields ) => {
+				const updatedHiddenFields = [ ...prevFields ];
+
+				// Insert the item from visible fields into hidden fields at the target index
+				updatedHiddenFields.splice( draggedTarget.index, 0, {
+					...element,
+					index: draggedTarget.index,
+					isVisible: false,
+				} );
+
+				// Update indices in hidden fields
+				const reorderedHiddenFields = updatedHiddenFields.map(
+					( field, index ) => ( {
+						...field,
+						index,
+					} )
+				);
+
+				return reorderedHiddenFields;
+			} );
+		}
+
+		setDraggedSource( null );
+		setDraggedTarget( null );
+	};
+
+	if ( view.type === LAYOUT_TABLE && view.layout?.combinedFields ) {
+		const newFields =
+			view.layout?.combinedFields?.map( ( { id, label } ) => ( {
 				id,
 				label,
-				index,
-				isVisible: false,
-				isHidable: enableHiding,
-			};
-		} );
+				index: visibleFieldIds.indexOf( id ),
+				isVisible: true,
+				isHidable: ! notHidableFieldIds.includes( id ),
+			} ) ) ?? [];
+		setVisibleFields( ( prevFields ) => [ ...prevFields, ...newFields ] );
+	}
+
+	visibleFields.sort( ( a, b ) => a.index - b.index );
+	hiddenFields.sort( ( a, b ) => a.index - b.index );
 
 	if ( ! visibleFields?.length && ! hiddenFields?.length ) {
 		return null;
@@ -446,6 +660,9 @@ function FieldControl() {
 							fields={ fields }
 							view={ view }
 							onChangeView={ onChangeView }
+							onDragStart={ handleDragStart }
+							onDragOver={ handleDragOver }
+							onDrop={ handleDrop }
 						/>
 					) ) }
 				</ItemGroup>
@@ -464,6 +681,9 @@ function FieldControl() {
 									fields={ fields }
 									view={ view }
 									onChangeView={ onChangeView }
+									onDragStart={ handleDragStart }
+									onDragOver={ handleDragOver }
+									onDrop={ handleDrop }
 								/>
 							) ) }
 						</ItemGroup>

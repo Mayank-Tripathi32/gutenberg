@@ -67,3 +67,18 @@
 		top: unset;
 	}
 }
+
+.dataviews-field-control__field .dataviews-field-control__draggable-icon[draggable="true"] {
+	cursor: grab;
+	transition: transform 0.2s, opacity 0.2s;
+}
+.dataviews-field-control__field .dataviews-field-control__draggable-icon[draggable="true"]:active {
+	cursor: grabbing;
+	opacity: 0.5;
+	transform: scale(1.02);
+}
+.dataviews-field-control__field .dataviews-field-control__draggable-icon:focus {
+	cursor: pointer;
+	outline: none;
+	box-shadow: none;
+}
