@@ -299,7 +299,8 @@ const SpacerEdit = ( {
 			}
 		} else if (
 			isFlexLayout &&
-			( selfStretch === 'fill' || selfStretch === 'fit' )
+			( selfStretch === 'fill' || selfStretch === 'fit' ) &&
+			width !== undefined
 		) {
 			if ( inheritedOrientation === 'horizontal' ) {
 				setAttributes( {
