@@ -103,6 +103,9 @@ function ListBox( { view, filter, onChangeView }: SearchWidgetProps ) {
 		<Composite
 			virtualFocus
 			focusLoop
+			focusWrap
+			orientation="vertical"
+			aria-orientation="vertical"
 			activeId={ activeCompositeId }
 			setActiveId={ setActiveCompositeId }
 			role="listbox"
@@ -142,6 +145,15 @@ function ListBox( { view, filter, onChangeView }: SearchWidgetProps ) {
 									className="dataviews-filters__search-widget-listitem"
 								/>
 							}
+							onKeyDown={ ( event ) => {
+								// Block Left/Right keys and use Up/Down for navigation
+								if (
+									event.key === 'ArrowLeft' ||
+									event.key === 'ArrowRight'
+								) {
+									event.preventDefault();
+								}
+							} }
 							onClick={ () => {
 								const newFilters = currentFilter
 									? [
