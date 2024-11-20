@@ -20,11 +20,10 @@ const CreateNewPostLink = ( { postType } ) => {
 	);
 	return (
 		<div className="wp-block-query__create-new-link">
-			{ createInterpolateElement(
-				'<a>' + addNewItemLabel + '</a>',
+			{ createInterpolateElement( '<a>' + addNewItemLabel + '</a>', {
 				// eslint-disable-next-line jsx-a11y/anchor-has-content
-				{ a: <a href={ newPostUrl } /> }
-			) }
+				a: <a href={ newPostUrl } target="_blank" rel="noreferrer" />,
+			} ) }
 		</div>
 	);
 };
