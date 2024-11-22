@@ -119,6 +119,22 @@ export default function WelcomeGuideDefault() {
 										),
 									}
 								) }
+								<br />
+								<br />
+								{ createInterpolateElement(
+									__(
+										'You can explore these <a>free courses offered by the official WordPress Training Team.</a>'
+									),
+									{
+										a: (
+											<ExternalLink
+												href={ __(
+													'https://learn.wordpress.org/learning-pathway/user/'
+												) }
+											/>
+										),
+									}
+								) }
 							</p>
 						</>
 					),
