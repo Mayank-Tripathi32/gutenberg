@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { SVG, Rect } from '@wordpress/components';
+import { SVG, Rect, Path, Circle } from '@wordpress/components';
 
 export const buttonOnly = (
 	<SVG xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -85,5 +85,20 @@ export const toggleLabel = (
 			strokeWidth="1.5"
 		/>
 		<Rect x="4" y="7" width="10" height="2" fill="currentColor" />
+	</SVG>
+);
+
+export const toggleSearchPopover = (
+	<SVG
+		xmlns="http://www.w3.org/2000/svg"
+		width={ 24 }
+		height={ 24 }
+		fill="none"
+		stroke="currentColor"
+		strokeWidth={ 2 }
+	>
+		<Circle cx={ 10 } cy={ 10 } r={ 7 } />
+		<Path d="m14 14 6 6" />
+		<Path fill="currentColor" d="M10 2v3h4l-4 4-4-4h4V2" />
 	</SVG>
 );

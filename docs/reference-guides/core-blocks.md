@@ -811,7 +811,7 @@ Help visitors find your content. ([Source](https://github.com/WordPress/gutenber
 -	**Name:** core/search
 -	**Category:** widgets
 -	**Supports:** align (center, left, right), color (background, gradients, text), interactivity, spacing (margin), typography (fontSize, lineHeight), ~~html~~
--	**Attributes:** buttonPosition, buttonText, buttonUseIcon, isSearchFieldHidden, label, placeholder, query, showLabel, width, widthUnit
+-	**Attributes:** buttonPosition, buttonText, buttonUseIcon, isSearchFieldHidden, isSearchPopover, label, placeholder, query, showLabel, width, widthUnit
 
 ## Separator
 

@@ -19,7 +19,7 @@ import {
 	useSettings,
 } from '@wordpress/block-editor';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { useEffect, useRef } from '@wordpress/element';
+import { useEffect, useRef, useState } from '@wordpress/element';
 import {
 	ToolbarDropdownMenu,
 	ToolbarGroup,
@@ -31,6 +31,9 @@ import {
 	__experimentalUnitControl as UnitControl,
 	__experimentalToggleGroupControl as ToggleGroupControl,
 	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
+	Button,
+	ToggleControl,
+	Modal,
 } from '@wordpress/components';
 import { useInstanceId } from '@wordpress/compose';
 import { Icon, search } from '@wordpress/icons';
@@ -47,6 +50,7 @@ import {
 	noButton,
 	buttonWithIcon,
 	toggleLabel,
+	toggleSearchPopover,
 } from './icons';
 import {
 	PC_WIDTH_DEFAULT,
@@ -80,6 +84,7 @@ export default function SearchEdit( {
 		buttonUseIcon,
 		isSearchFieldHidden,
 		style,
+		isSearchPopover,
 	} = attributes;
 
 	const wasJustInsertedIntoNavigationBlock = useSelect(
@@ -404,6 +409,16 @@ export default function SearchEdit( {
 							}
 						/>
 					) }
+					<ToolbarButton
+						title={ __( 'Open Search as Popover' ) }
+						icon={ toggleSearchPopover }
+						onClick={ () => {
+							setAttributes( {
+								isSearchPopover: ! isSearchPopover,
+							} );
+						} }
+						className={ isSearchPopover ? 'is-pressed' : undefined }
+					/>
 				</ToolbarGroup>
 			</BlockControls>
 
@@ -549,10 +564,8 @@ export default function SearchEdit( {
 		typographyProps.className
 	);
 
-	return (
-		<div { ...blockProps }>
-			{ controls }
-
+	const renderSearchForm = (
+		<>
 			{ showLabel && (
 				<RichText
 					identifier="label"
@@ -607,6 +620,60 @@ export default function SearchEdit( {
 
 				{ hasNoButton && renderTextField() }
 			</ResizableBox>
+		</>
+	);
+
+	return (
+		<div { ...blockProps }>
+			{ controls }
+			{ isSearchPopover ? (
+				<SearchPopOverWrapper content={ renderSearchForm } />
+			) : (
+				renderSearchForm
+			) }
 		</div>
+	);
+}
+
+function SearchPopOverWrapper( { content } ) {
+	const [ isVisible, setVisible ] = useState( false );
+	const [ showIcon, setShowIcon ] = useState( false );
+
+	const toggleSearchPopup = () => {
+		setVisible( ( prev ) => ! prev );
+	};
+
+	return (
+		<>
+			<Button
+				onClick={ toggleSearchPopup }
+				variant="secondary"
+				__next40pxDefaultSize
+			>
+				{ showIcon ? <Icon icon={ search } /> : 'Search' }
+			</Button>
+			<InspectorControls>
+				<PanelBody title={ __( 'Search Modal Controls' ) }>
+					<VStack
+						className="wp-block-search__inspector-controls"
+						spacing={ 4 }
+					>
+						<ToggleControl
+							__nextHasNoMarginBottom
+							label="Search Icon"
+							checked={ showIcon }
+							onChange={ () =>
+								setShowIcon( ( state ) => ! state )
+							}
+						/>
+					</VStack>
+				</PanelBody>
+			</InspectorControls>
+			{ isVisible ? (
+				<Modal onRequestClose={ toggleSearchPopup }>{ content }</Modal>
+			) : (
+				<></>
+			) }
+		</>
 	);
 }

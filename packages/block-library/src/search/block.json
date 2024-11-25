@@ -46,6 +46,10 @@
 		"isSearchFieldHidden": {
 			"type": "boolean",
 			"default": false
+		},
+		"isSearchPopover": {
+			"type": "boolean",
+			"default": false
 		}
 	},
 	"supports": {
