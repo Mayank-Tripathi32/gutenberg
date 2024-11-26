@@ -41,6 +41,12 @@ type DialogOptions = {
 	constrainTabbing?: boolean;
 	onClose?: () => void;
 	/**
+	 * Whether to close on click outside.
+	 *
+	 * @default true
+	 */
+	closeOnOutsideClick?: boolean;
+	/**
 	 * Use the `onClose` prop instead.
 	 *
 	 * @deprecated
@@ -67,7 +73,10 @@ type useDialogReturn = [
  */
 function useDialog( options: DialogOptions ): useDialogReturn {
 	const currentOptions = useRef< DialogOptions | undefined >();
-	const { constrainTabbing = options.focusOnMount !== false } = options;
+	const {
+		constrainTabbing = options.focusOnMount !== false,
+		closeOnOutsideClick = true,
+	} = options;
 	useEffect( () => {
 		currentOptions.current = options;
 	}, Object.values( options ) );
@@ -79,7 +88,7 @@ function useDialog( options: DialogOptions ): useDialogReturn {
 		// for the Popover component otherwise, the onClose should be enough.
 		if ( currentOptions.current?.__unstableOnClose ) {
 			currentOptions.current.__unstableOnClose( 'focus-outside', event );
-		} else if ( currentOptions.current?.onClose ) {
+		} else if ( currentOptions.current?.onClose && closeOnOutsideClick ) {
 			currentOptions.current.onClose();
 		}
 	} );
