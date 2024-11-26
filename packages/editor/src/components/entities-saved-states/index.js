@@ -8,10 +8,7 @@ import {
 	useRef,
 	createInterpolateElement,
 } from '@wordpress/element';
-import {
-	__experimentalUseDialog as useDialog,
-	useInstanceId,
-} from '@wordpress/compose';
+import { useInstanceId } from '@wordpress/compose';
 import { useDispatch } from '@wordpress/data';
 
 /**
@@ -109,9 +106,6 @@ export function EntitiesSavedStatesExtensible( {
 	// its own will use the event object in place of the expected saved entities.
 	const dismissPanel = useCallback( () => close(), [ close ] );
 
-	const [ saveDialogRef, saveDialogProps ] = useDialog( {
-		onClose: () => dismissPanel(),
-	} );
 	const dialogLabel = useInstanceId( EntitiesSavedStatesExtensible, 'label' );
 	const dialogDescription = useInstanceId(
 		EntitiesSavedStatesExtensible,
@@ -120,8 +114,6 @@ export function EntitiesSavedStatesExtensible( {
 
 	return (
 		<div
-			ref={ saveDialogRef }
-			{ ...saveDialogProps }
 			className="entities-saved-states__panel"
 			role={ renderDialog ? 'dialog' : undefined }
 			aria-labelledby={ renderDialog ? dialogLabel : undefined }
