@@ -29,21 +29,24 @@ function identity( values ) {
 /**
  * Renders the component for managing saved states of entities.
  *
- * @param {Object}   props              The component props.
- * @param {Function} props.close        The function to close the dialog.
- * @param {Function} props.renderDialog The function to render the dialog.
+ * @param {Object}   props                     The component props.
+ * @param {Function} props.close               The function to close the dialog.
+ * @param {Function} props.renderDialog        The function to render the dialog.
+ * @param {boolean}  props.closeOnOutsideClick Whether to close if outside click is detected.
  *
  * @return {JSX.Element} The rendered component.
  */
 export default function EntitiesSavedStates( {
 	close,
 	renderDialog = undefined,
+	closeOnOutsideClick = true,
 } ) {
 	const isDirtyProps = useIsDirty();
 	return (
 		<EntitiesSavedStatesExtensible
 			close={ close }
 			renderDialog={ renderDialog }
+			closeOnOutsideClick={ closeOnOutsideClick }
 			{ ...isDirtyProps }
 		/>
 	);
@@ -63,6 +66,7 @@ export default function EntitiesSavedStates( {
  * @param {boolean}  props.isDirty               Flag indicating if there are dirty entities.
  * @param {Function} props.setUnselectedEntities Function to set unselected entities.
  * @param {Array}    props.unselectedEntities    Array of unselected entities.
+ * @param {boolean}  props.closeOnOutsideClick   Whether to close if outside click is detected.
  *
  * @return {JSX.Element} The rendered component.
  */
@@ -77,6 +81,7 @@ export function EntitiesSavedStatesExtensible( {
 	isDirty,
 	setUnselectedEntities,
 	unselectedEntities,
+	closeOnOutsideClick = true,
 } ) {
 	const saveButtonRef = useRef();
 	const { saveDirtyEntities } = unlock( useDispatch( editorStore ) );
@@ -111,6 +116,7 @@ export function EntitiesSavedStatesExtensible( {
 
 	const [ saveDialogRef, saveDialogProps ] = useDialog( {
 		onClose: () => dismissPanel(),
+		closeOnOutsideClick,
 	} );
 	const dialogLabel = useInstanceId( EntitiesSavedStatesExtensible, 'label' );
 	const dialogDescription = useInstanceId(

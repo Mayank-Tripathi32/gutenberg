@@ -80,12 +80,20 @@ const EntitiesSavedStatesForPreview = ( { onClose } ) => {
 	);
 };
 
-const _EntitiesSavedStates = ( { onClose, renderDialog = undefined } ) => {
+const _EntitiesSavedStates = ( {
+	onClose,
+	renderDialog = undefined,
+	closeOnOutsideClick = true,
+} ) => {
 	if ( isPreviewingTheme() ) {
 		return <EntitiesSavedStatesForPreview onClose={ onClose } />;
 	}
 	return (
-		<EntitiesSavedStates close={ onClose } renderDialog={ renderDialog } />
+		<EntitiesSavedStates
+			close={ onClose }
+			renderDialog={ renderDialog }
+			closeOnOutsideClick={ closeOnOutsideClick }
+		/>
 	);
 };
 
@@ -129,7 +137,10 @@ export default function SavePanel() {
 					'Save site, content, and template changes'
 				) }
 			>
-				<_EntitiesSavedStates onClose={ onClose } />
+				<_EntitiesSavedStates
+					onClose={ onClose }
+					closeOnOutsideClick={ false }
+				/>
 			</Modal>
 		) : null;
 	}

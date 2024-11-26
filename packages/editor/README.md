@@ -402,6 +402,7 @@ _Parameters_
 -   _props_ `Object`: The component props.
 -   _props.close_ `Function`: The function to close the dialog.
 -   _props.renderDialog_ `Function`: The function to render the dialog.
+-   _props.closeOnOutsideClick_ `boolean`: Whether to close if outside click is detected.
 
 _Returns_
 
