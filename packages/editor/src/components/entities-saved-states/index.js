@@ -8,10 +8,6 @@ import {
 	useRef,
 	createInterpolateElement,
 } from '@wordpress/element';
-import {
-	__experimentalUseDialog as useDialog,
-	useInstanceId,
-} from '@wordpress/compose';
 import { useDispatch } from '@wordpress/data';
 
 /**
@@ -29,23 +25,15 @@ function identity( values ) {
 /**
  * Renders the component for managing saved states of entities.
  *
- * @param {Object}   props              The component props.
- * @param {Function} props.close        The function to close the dialog.
- * @param {Function} props.renderDialog The function to render the dialog.
+ * @param {Object}   props       The component props.
+ * @param {Function} props.close The function to close the dialog.
  *
  * @return {JSX.Element} The rendered component.
  */
-export default function EntitiesSavedStates( {
-	close,
-	renderDialog = undefined,
-} ) {
+export default function EntitiesSavedStates( { close } ) {
 	const isDirtyProps = useIsDirty();
 	return (
-		<EntitiesSavedStatesExtensible
-			close={ close }
-			renderDialog={ renderDialog }
-			{ ...isDirtyProps }
-		/>
+		<EntitiesSavedStatesExtensible close={ close } { ...isDirtyProps } />
 	);
 }
 
@@ -58,7 +46,6 @@ export default function EntitiesSavedStates( {
  * @param {Function} props.onSave                Function to call when saving entities.
  * @param {boolean}  props.saveEnabled           Flag indicating if save is enabled.
  * @param {string}   props.saveLabel             Label for the save button.
- * @param {Function} props.renderDialog          Function to render a custom dialog.
  * @param {Array}    props.dirtyEntityRecords    Array of dirty entity records.
  * @param {boolean}  props.isDirty               Flag indicating if there are dirty entities.
  * @param {Function} props.setUnselectedEntities Function to set unselected entities.
@@ -72,7 +59,6 @@ export function EntitiesSavedStatesExtensible( {
 	onSave = identity,
 	saveEnabled: saveEnabledProp = undefined,
 	saveLabel = __( 'Save' ),
-	renderDialog = undefined,
 	dirtyEntityRecords,
 	isDirty,
 	setUnselectedEntities,
@@ -109,24 +95,8 @@ export function EntitiesSavedStatesExtensible( {
 	// its own will use the event object in place of the expected saved entities.
 	const dismissPanel = useCallback( () => close(), [ close ] );
 
-	const [ saveDialogRef, saveDialogProps ] = useDialog( {
-		onClose: () => dismissPanel(),
-	} );
-	const dialogLabel = useInstanceId( EntitiesSavedStatesExtensible, 'label' );
-	const dialogDescription = useInstanceId(
-		EntitiesSavedStatesExtensible,
-		'description'
-	);
-
 	return (
-		<div
-			ref={ saveDialogRef }
-			{ ...saveDialogProps }
-			className="entities-saved-states__panel"
-			role={ renderDialog ? 'dialog' : undefined }
-			aria-labelledby={ renderDialog ? dialogLabel : undefined }
-			aria-describedby={ renderDialog ? dialogDescription : undefined }
-		>
+		<div className="entities-saved-states__panel">
 			<Flex className="entities-saved-states__panel-header" gap={ 2 }>
 				<FlexItem
 					isBlock
@@ -160,16 +130,13 @@ export function EntitiesSavedStatesExtensible( {
 			</Flex>
 
 			<div className="entities-saved-states__text-prompt">
-				<div
-					className="entities-saved-states__text-prompt--header-wrapper"
-					id={ renderDialog ? dialogLabel : undefined }
-				>
+				<div className="entities-saved-states__text-prompt--header-wrapper">
 					<strong className="entities-saved-states__text-prompt--header">
 						{ __( 'Are you ready to save?' ) }
 					</strong>
 					{ additionalPrompt }
 				</div>
-				<p id={ renderDialog ? dialogDescription : undefined }>
+				<p>
 					{ isDirty
 						? createInterpolateElement(
 								sprintf(
