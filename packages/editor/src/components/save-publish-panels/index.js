@@ -5,11 +5,17 @@ import { useSelect, useDispatch } from '@wordpress/data';
 import { Button, createSlotFill } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { useCallback } from '@wordpress/element';
+import {
+	__experimentalUseDialog as useDialog,
+	useInstanceId,
+} from '@wordpress/compose';
 
 /**
  * Internal dependencies
  */
-import EntitiesSavedStates from '../entities-saved-states';
+import EntitiesSavedStates, {
+	EntitiesSavedStatesExtensible,
+} from '../entities-saved-states';
 import PostPublishPanel from '../post-publish-panel';
 import PluginPrePublishPanel from '../plugin-pre-publish-panel';
 import PluginPostPublishPanel from '../plugin-post-publish-panel';
@@ -102,10 +108,47 @@ export default function SavePublishPanels( {
 	return (
 		<>
 			{ isEntitiesSavedStatesOpen && (
-				<EntitiesSavedStates close={ closeEntitiesSavedStates } />
+				<EntitieDialogWrapper close={ closeEntitiesSavedStates }>
+					<EntitiesSavedStates close={ closeEntitiesSavedStates } />
+				</EntitieDialogWrapper>
 			) }
 			<Slot bubblesVirtually />
 			{ ! isEntitiesSavedStatesOpen && unmountableContent }
 		</>
+	);
+}
+
+/**
+ * A wrapper component that renders a dialog for displaying entities.
+ *
+ * @param {Object}          props          The component's props.
+ * @param {React.ReactNode} props.children The content to be displayed inside the dialog.
+ * @param {Function}        props.close    A function to close the dialog.
+ *
+ * @return {React.Element} The rendered dialog element with children.
+ */
+export function EntitieDialogWrapper( { children, close } ) {
+	const dismissPanel = useCallback( () => close(), [ close ] );
+	const [ saveDialogRef, saveDialogProps ] = useDialog( {
+		onClose: () => dismissPanel(),
+	} );
+
+	const dialogLabel = useInstanceId( EntitiesSavedStatesExtensible, 'label' );
+	const dialogDescription = useInstanceId(
+		EntitiesSavedStatesExtensible,
+		'description'
+	);
+
+	return (
+		<div
+			ref={ saveDialogRef }
+			{ ...saveDialogProps }
+			role="dialog"
+			aria-labelledby={ dialogLabel }
+			aria-describedby={ dialogDescription }
+		>
+			{ ' ' }
+			{ children }
+		</div>
 	);
 }
