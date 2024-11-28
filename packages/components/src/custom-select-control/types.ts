@@ -120,4 +120,13 @@ export type CustomSelectProps< T extends CustomSelectOption > = {
 	 * @default false
 	 */
 	__next40pxDefaultSize?: boolean;
+	/**
+	 * Enables legacy behavior for the custom select dropdown.
+	 *
+	 * When set to `true`, the dropdown will follow the legacy implementation, including
+	 * positioning and interaction styles. Set to `false` to use the updated behavior.
+	 *
+	 * @default true
+	 */
+	isLegacy?: boolean;
 };

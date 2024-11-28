@@ -63,6 +63,7 @@ function CustomSelectControl< T extends CustomSelectOption >(
 		value,
 		className: classNameProp,
 		showSelectedHint = false,
+		isLegacy = true,
 		...restProps
 	} = useDeprecatedProps( props );
 
@@ -189,7 +190,7 @@ function CustomSelectControl< T extends CustomSelectOption >(
 					'components-custom-select-control',
 					classNameProp
 				) }
-				isLegacy
+				isLegacy={ isLegacy }
 				{ ...restProps }
 			>
 				{ children }

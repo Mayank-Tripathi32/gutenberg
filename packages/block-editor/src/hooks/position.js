@@ -287,6 +287,7 @@ export function PositionPanelPure( {
 								onChangeType( selectedItem.value );
 							} }
 							size="__unstable-large"
+							isLegacy={ false }
 						/>
 					</BaseControl>
 				</InspectorControls>
