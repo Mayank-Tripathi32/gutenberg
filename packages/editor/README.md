@@ -406,6 +406,20 @@ _Returns_
 
 -   `JSX.Element`: The rendered component.
 
+### EntitiesSavedStatesDialogWrapper
+
+A wrapper component that renders a dialog for displaying entities.
+
+_Parameters_
+
+-   _props_ `Object`: The component's props.
+-   _props.children_ `React.ReactNode`: The content to be displayed inside the dialog.
+-   _props.close_ `Function`: A function to close the dialog.
+
+_Returns_
+
+-   `React.Element`: The rendered dialog element with children.
+
 ### ErrorBoundary
 
 ErrorBoundary is used to catch JavaScript errors anywhere in a child component tree, log those errors, and display a fallback UI.

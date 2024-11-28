@@ -11,6 +11,7 @@ import {
 	EntitiesSavedStates,
 	useEntitiesSavedStatesIsDirty,
 	privateApis,
+	EntitiesSavedStatesDialogWrapper,
 } from '@wordpress/editor';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { __, sprintf } from '@wordpress/i18n';
@@ -32,7 +33,10 @@ const { EntitiesSavedStatesExtensible, NavigableRegion } =
 const { useLocation } = unlock( routerPrivateApis );
 
 const EntitiesSavedStatesForPreview = ( { onClose } ) => {
+	const { params } = useLocation();
+	const { canvas = 'view' } = params;
 	const isDirtyProps = useEntitiesSavedStatesIsDirty();
+
 	let activateSaveLabel;
 	if ( isDirtyProps.isDirty ) {
 		activateSaveLabel = __( 'Activate & Save' );
@@ -66,17 +70,34 @@ const EntitiesSavedStatesForPreview = ( { onClose } ) => {
 		return values;
 	};
 
+	if ( canvas === 'view' ) {
+		return (
+			<EntitiesSavedStatesExtensible
+				{ ...{
+					...isDirtyProps,
+					additionalPrompt,
+					close: onClose,
+					onSave,
+					saveEnabled: true,
+					saveLabel: activateSaveLabel,
+				} }
+			/>
+		);
+	}
+
 	return (
-		<EntitiesSavedStatesExtensible
-			{ ...{
-				...isDirtyProps,
-				additionalPrompt,
-				close: onClose,
-				onSave,
-				saveEnabled: true,
-				saveLabel: activateSaveLabel,
-			} }
-		/>
+		<EntitiesSavedStatesDialogWrapper close={ onClose }>
+			<EntitiesSavedStatesExtensible
+				{ ...{
+					...isDirtyProps,
+					additionalPrompt,
+					close: onClose,
+					onSave,
+					saveEnabled: true,
+					saveLabel: activateSaveLabel,
+				} }
+			/>
+		</EntitiesSavedStatesDialogWrapper>
 	);
 };
 

@@ -9,6 +9,10 @@ import {
 	createInterpolateElement,
 } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
+import {
+	__experimentalUseDialog as useDialog,
+	useInstanceId,
+} from '@wordpress/compose';
 
 /**
  * Internal dependencies
@@ -164,6 +168,40 @@ export function EntitiesSavedStatesExtensible( {
 					/>
 				);
 			} ) }
+		</div>
+	);
+}
+
+/**
+ * A wrapper component that renders a dialog for displaying entities.
+ *
+ * @param {Object}          props          The component's props.
+ * @param {React.ReactNode} props.children The content to be displayed inside the dialog.
+ * @param {Function}        props.close    A function to close the dialog.
+ *
+ * @return {React.Element} The rendered dialog element with children.
+ */
+export function EntitiesSavedStatesDialogWrapper( { children, close } ) {
+	const dismissPanel = useCallback( () => close(), [ close ] );
+	const [ saveDialogRef, saveDialogProps ] = useDialog( {
+		onClose: () => dismissPanel(),
+	} );
+
+	const dialogLabel = useInstanceId( EntitiesSavedStatesExtensible, 'label' );
+	const dialogDescription = useInstanceId(
+		EntitiesSavedStatesExtensible,
+		'description'
+	);
+
+	return (
+		<div
+			ref={ saveDialogRef }
+			{ ...saveDialogProps }
+			role="dialog"
+			aria-labelledby={ dialogLabel }
+			aria-describedby={ dialogDescription }
+		>
+			{ children }
 		</div>
 	);
 }
