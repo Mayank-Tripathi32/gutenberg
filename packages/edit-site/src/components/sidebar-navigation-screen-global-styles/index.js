@@ -41,7 +41,13 @@ export function SidebarNavigationItemGlobalStyles( props ) {
 			/>
 		);
 	}
-	return <SidebarNavigationItem { ...props } />;
+	return (
+		<SidebarNavigationItem
+			{ ...props }
+			to="/styles"
+			aria-current={ name === 'styles' }
+		/>
+	);
 }
 
 export default function SidebarNavigationScreenGlobalStyles() {
