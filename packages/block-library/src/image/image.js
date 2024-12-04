@@ -38,7 +38,13 @@ import { useEffect, useMemo, useState, useRef } from '@wordpress/element';
 import { __, _x, sprintf, isRTL } from '@wordpress/i18n';
 import { getFilename } from '@wordpress/url';
 import { getBlockBindingsSource, switchToBlockType } from '@wordpress/blocks';
-import { crop, overlayText, upload, chevronDown } from '@wordpress/icons';
+import {
+	crop,
+	overlayText,
+	upload,
+	chevronDown,
+	formatIndent,
+} from '@wordpress/icons';
 import { store as noticesStore } from '@wordpress/notices';
 import { store as coreStore, useEntityProp } from '@wordpress/core-data';
 
@@ -424,7 +430,7 @@ export default function Image( {
 	function onSetLightbox( enable ) {
 		if ( enable && ! lightboxSetting?.enabled ) {
 			setAttributes( {
-				lightbox: { enabled: true },
+				lightbox: { enabled: true, applyStyles: true },
 			} );
 		} else if ( ! enable && lightboxSetting?.enabled ) {
 			setAttributes( {
@@ -433,6 +439,17 @@ export default function Image( {
 		} else {
 			setAttributes( {
 				lightbox: undefined,
+			} );
+		}
+	}
+
+	function toggleStylingLightbox() {
+		if ( lightbox?.enabled ) {
+			setAttributes( {
+				lightbox: {
+					enabled: true,
+					applyStyles: ! lightbox?.applyStyles,
+				},
 			} );
 		}
 	}
@@ -743,6 +760,14 @@ export default function Image( {
 							lightboxEnabled={ lightboxChecked }
 							onSetLightbox={ onSetLightbox }
 							resetLightbox={ resetLightbox }
+						/>
+					) }
+					{ lightboxChecked && showLightboxSetting && (
+						<ToolbarButton
+							icon={ formatIndent }
+							label={ __( 'Apply Custom Styles to lightbox' ) }
+							onClick={ toggleStylingLightbox }
+							isActive={ lightbox?.applyStyles ?? false }
 						/>
 					) }
 					{ allowCrop && (
