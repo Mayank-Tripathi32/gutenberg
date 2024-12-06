@@ -37,6 +37,7 @@ import {
 	verse,
 	search,
 	tag,
+	pencil,
 } from '@wordpress/icons';
 import { __, sprintf } from '@wordpress/i18n';
 import { store as noticesStore } from '@wordpress/notices';
@@ -77,6 +78,7 @@ const DEFAULT_TEMPLATE_SLUGS = [
 	'tag',
 	'search',
 	'404',
+	'singular',
 ];
 
 const TEMPLATE_ICONS = {
@@ -94,6 +96,7 @@ const TEMPLATE_ICONS = {
 	date: calendar,
 	tag,
 	attachment: media,
+	singular: pencil,
 };
 
 function TemplateListItem( {
