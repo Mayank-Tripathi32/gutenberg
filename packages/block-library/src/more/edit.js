@@ -2,7 +2,11 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { PanelBody, ToggleControl } from '@wordpress/components';
+import {
+	ToggleControl,
+	__experimentalToolsPanel as ToolsPanel,
+	__experimentalToolsPanelItem as ToolsPanelItem,
+} from '@wordpress/components';
 import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
 import { ENTER } from '@wordpress/keycodes';
 import { getDefaultBlockName, createBlock } from '@wordpress/blocks';
@@ -40,17 +44,31 @@ export default function MoreEdit( {
 	return (
 		<>
 			<InspectorControls>
-				<PanelBody>
-					<ToggleControl
-						__nextHasNoMarginBottom
-						label={ __(
-							'Hide the excerpt on the full content page'
-						) }
-						checked={ !! noTeaser }
-						onChange={ toggleHideExcerpt }
-						help={ getHideExcerptHelp }
-					/>
-				</PanelBody>
+				<ToolsPanel
+					label={ __( 'Settings' ) }
+					resetAll={ () => {
+						setAttributes( { noTeaser: false } );
+					} }
+				>
+					<ToolsPanelItem
+						isShownByDefault
+						label={ __( 'Hide the excerpt' ) }
+						onDeselect={ () => {
+							setAttributes( { noTeaser: false } );
+						} }
+						hasValue={ () => !! noTeaser }
+					>
+						<ToggleControl
+							__nextHasNoMarginBottom
+							label={ __(
+								'Hide the excerpt on the full content page'
+							) }
+							checked={ !! noTeaser }
+							onChange={ toggleHideExcerpt }
+							help={ getHideExcerptHelp }
+						/>
+					</ToolsPanelItem>
+				</ToolsPanel>
 			</InspectorControls>
 			<div { ...useBlockProps() }>
 				<input
