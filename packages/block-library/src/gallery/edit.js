@@ -8,7 +8,6 @@ import clsx from 'clsx';
  */
 import {
 	BaseControl,
-	PanelBody,
 	SelectControl,
 	ToggleControl,
 	RangeControl,
@@ -16,6 +15,8 @@ import {
 	MenuGroup,
 	MenuItem,
 	ToolbarDropdownMenu,
+	__experimentalToolsPanel as ToolsPanel,
+	__experimentalToolsPanelItem as ToolsPanelItem,
 } from '@wordpress/components';
 import {
 	store as blockEditorStore,
@@ -560,84 +561,166 @@ export default function GalleryEdit( props ) {
 	return (
 		<>
 			<InspectorControls>
-				<PanelBody title={ __( 'Settings' ) }>
+				<ToolsPanel
+					label={ __( 'Settings' ) }
+					resetAll={ () => {
+						setAttributes( {
+							columns: undefined,
+							imageCrop: true,
+							randomOrder: false,
+							linkTarget: undefined,
+							linkTo: 'none',
+							sizeSlug: 'large',
+						} );
+					} }
+				>
 					{ images.length > 1 && (
-						<RangeControl
-							__nextHasNoMarginBottom
+						<ToolsPanelItem
+							isShownByDefault
 							label={ __( 'Columns' ) }
-							value={
-								columns
-									? columns
-									: defaultColumnsNumber( images.length )
+							hasValue={ () => !! columns }
+							onDeselect={ () =>
+								setAttributes( { columns: undefined } )
 							}
-							onChange={ setColumnsNumber }
-							min={ 1 }
-							max={ Math.min( MAX_COLUMNS, images.length ) }
-							{ ...MOBILE_CONTROL_PROPS_RANGE_CONTROL }
-							required
-							__next40pxDefaultSize
-						/>
+						>
+							<RangeControl
+								__nextHasNoMarginBottom
+								label={ __( 'Columns' ) }
+								value={
+									columns
+										? columns
+										: defaultColumnsNumber( images.length )
+								}
+								onChange={ setColumnsNumber }
+								min={ 1 }
+								max={ Math.min( MAX_COLUMNS, images.length ) }
+								{ ...MOBILE_CONTROL_PROPS_RANGE_CONTROL }
+								required
+								__next40pxDefaultSize
+							/>
+						</ToolsPanelItem>
 					) }
+
 					{ imageSizeOptions?.length > 0 && (
-						<SelectControl
-							__nextHasNoMarginBottom
+						<ToolsPanelItem
+							isShownByDefault
 							label={ __( 'Resolution' ) }
-							help={ __(
-								'Select the size of the source images.'
-							) }
-							value={ sizeSlug }
-							options={ imageSizeOptions }
-							onChange={ updateImagesSize }
-							hideCancelButton
-							size="__unstable-large"
-						/>
+							hasValue={ () => ! ( sizeSlug === 'large' ) }
+							onDeselect={ () =>
+								// Pass the default value to the update function to reset the size.
+								setAttributes( { sizeSlug: 'large' } )
+							}
+						>
+							<SelectControl
+								__nextHasNoMarginBottom
+								label={ __( 'Resolution' ) }
+								help={ __(
+									'Select the size of the source images.'
+								) }
+								value={ sizeSlug }
+								options={ imageSizeOptions }
+								onChange={ updateImagesSize }
+								hideCancelButton
+								size="__unstable-large"
+							/>
+						</ToolsPanelItem>
 					) }
+
 					{ Platform.isNative ? (
-						<SelectControl
-							__nextHasNoMarginBottom
+						<ToolsPanelItem
+							isShownByDefault
 							label={ __( 'Link' ) }
-							value={ linkTo }
-							onChange={ setLinkTo }
-							options={ linkOptions }
-							hideCancelButton
-							size="__unstable-large"
-						/>
+							hasValue={ () => !! linkTo }
+							onDeselect={ () => {
+								setAttributes( { linkTo: undefined } );
+							} }
+						>
+							<SelectControl
+								__nextHasNoMarginBottom
+								label={ __( 'Link' ) }
+								value={ linkTo }
+								onChange={ setLinkTo }
+								options={ linkOptions }
+								hideCancelButton
+								size="__unstable-large"
+							/>
+						</ToolsPanelItem>
 					) : null }
-					<ToggleControl
-						__nextHasNoMarginBottom
-						label={ __( 'Crop images to fit' ) }
-						checked={ !! imageCrop }
-						onChange={ toggleImageCrop }
-					/>
-					<ToggleControl
-						__nextHasNoMarginBottom
-						label={ __( 'Randomize order' ) }
-						checked={ !! randomOrder }
-						onChange={ toggleRandomOrder }
-					/>
-					{ hasLinkTo && (
+
+					<ToolsPanelItem
+						isShownByDefault
+						label={ __( 'Crop Image' ) }
+						hasValue={ () => ! imageCrop }
+						onDeselect={ () =>
+							setAttributes( { imageCrop: true } )
+						}
+					>
 						<ToggleControl
 							__nextHasNoMarginBottom
-							label={ __( 'Open images in new tab' ) }
-							checked={ linkTarget === '_blank' }
-							onChange={ toggleOpenInNewTab }
+							label={ __( 'Crop images to fit' ) }
+							checked={ !! imageCrop }
+							onChange={ toggleImageCrop }
 						/>
-					) }
-					{ Platform.isWeb && ! imageSizeOptions && hasImageIds && (
-						<BaseControl
-							className="gallery-image-sizes"
+					</ToolsPanelItem>
+
+					<ToolsPanelItem
+						isShownByDefault
+						label={ __( 'Randomize order' ) }
+						hasValue={ () => !! randomOrder }
+						onDeselect={ () =>
+							setAttributes( { randomOrder: false } )
+						}
+					>
+						<ToggleControl
 							__nextHasNoMarginBottom
+							label={ __( 'Randomize order' ) }
+							checked={ !! randomOrder }
+							onChange={ toggleRandomOrder }
+						/>
+					</ToolsPanelItem>
+
+					{ hasLinkTo && (
+						<ToolsPanelItem
+							isShownByDefault
+							label={ __( 'Open images in new tab' ) }
+							hasValue={ () => !! linkTarget }
+							onDeselect={ () => {
+								setAttributes( { linkTarget: undefined } );
+							} }
 						>
-							<BaseControl.VisualLabel>
-								{ __( 'Resolution' ) }
-							</BaseControl.VisualLabel>
-							<View className="gallery-image-sizes__loading">
-								<Spinner />
-								{ __( 'Loading options…' ) }
-							</View>
-						</BaseControl>
+							<ToggleControl
+								__nextHasNoMarginBottom
+								label={ __( 'Open images in new tab' ) }
+								checked={ linkTarget === '_blank' }
+								onChange={ toggleOpenInNewTab }
+							/>
+						</ToolsPanelItem>
 					) }
-				</PanelBody>
+
+					{ Platform.isWeb && ! imageSizeOptions && hasImageIds && (
+						<ToolsPanelItem
+							label={ __( 'Resolution' ) }
+							isShownByDefault
+							hasValue={ () => ! ( sizeSlug === 'large' ) }
+							onDeselect={ () => {
+								setAttributes( { sizeSlug: 'large' } );
+							} }
+						>
+							<BaseControl
+								className="gallery-image-sizes"
+								__nextHasNoMarginBottom
+							>
+								<BaseControl.VisualLabel>
+									{ __( 'Resolution' ) }
+								</BaseControl.VisualLabel>
+								<View className="gallery-image-sizes__loading">
+									<Spinner />
+									{ __( 'Loading options…' ) }
+								</View>
+							</BaseControl>
+						</ToolsPanelItem>
+					) }
+				</ToolsPanel>
 			</InspectorControls>
 			{ Platform.isWeb ? (
 				<BlockControls group="block">
