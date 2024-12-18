@@ -13,8 +13,8 @@ import { useSelect } from '@wordpress/data';
 import {
 	__experimentalToggleGroupControl as ToggleGroupControl,
 	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
+	__experimentalToolsPanel as ToolsPanel,
 	ToggleControl,
-	PanelBody,
 	privateApis as componentsPrivateApis,
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
@@ -228,7 +228,7 @@ function LayoutPanelPure( {
 	return (
 		<>
 			<InspectorControls>
-				<PanelBody title={ __( 'Layout' ) }>
+				<ToolsPanel label={ __( 'Layout' ) }>
 					{ showInheritToggle && (
 						<>
 							<ToggleControl
@@ -289,7 +289,7 @@ function LayoutPanelPure( {
 							clientId={ clientId }
 						/>
 					) }
-				</PanelBody>
+				</ToolsPanel>
 			</InspectorControls>
 			{ ! inherit && layoutType && (
 				<layoutType.toolBarControls
