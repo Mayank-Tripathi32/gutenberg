@@ -13,6 +13,7 @@ import { __ } from '@wordpress/i18n';
 import { store as editorStore } from '@wordpress/editor';
 import { privateApis as routerPrivateApis } from '@wordpress/router';
 import { addQueryArgs } from '@wordpress/url';
+import { store as blockEditorStore } from '@wordpress/block-editor';
 
 /**
  * Internal dependencies
@@ -25,12 +26,19 @@ export default function useEditorIframeProps() {
 	const { query, path } = useLocation();
 	const history = useHistory();
 	const { canvas = 'view' } = query;
-	const currentPostIsTrashed = useSelect( ( select ) => {
-		return (
-			select( editorStore ).getCurrentPostAttribute( 'status' ) ===
-			'trash'
+	const { currentPostIsTrashed, isZoomedOut, selectedBlockClientId } =
+		useSelect(
+			( select ) => ( {
+				currentPostIsTrashed:
+					select( editorStore ).getCurrentPostAttribute(
+						'status'
+					) === 'trash',
+				isZoomedOut: unlock( select( blockEditorStore ) ).isZoomOut(),
+				selectedBlockClientId:
+					select( blockEditorStore ).getSelectedBlockClientId(),
+			} ),
+			[]
 		);
-	}, [] );
 	const [ isFocused, setIsFocused ] = useState( false );
 
 	useEffect( () => {
@@ -38,6 +46,23 @@ export default function useEditorIframeProps() {
 			setIsFocused( false );
 		}
 	}, [ canvas ] );
+
+	// Handle keyboard event to focus on the block when in zoom mode
+	const handleZoomModeKeyboard = ( event ) => {
+		if ( event.keyCode === ENTER && selectedBlockClientId && isZoomedOut ) {
+			const editorCanvas = document.querySelector(
+				'.edit-site-visual-editor__editor-canvas'
+			);
+			if ( editorCanvas?.contentDocument ) {
+				const blockElement = editorCanvas.contentDocument.querySelector(
+					`[data-block="${ selectedBlockClientId }"]`
+				);
+				if ( blockElement ) {
+					blockElement.focus();
+				}
+			}
+		}
+	};
 
 	// In view mode, make the canvas iframe be perceived and behave as a button
 	// to switch to edit mode, with a meaningful label and no title attribute.
@@ -78,6 +103,7 @@ export default function useEditorIframeProps() {
 		className: clsx( 'edit-site-visual-editor__editor-canvas', {
 			'is-focused': isFocused && canvas === 'view',
 		} ),
+		onKeyDown: handleZoomModeKeyboard,
 		...( canvas === 'view' ? viewModeIframeProps : {} ),
 	};
 }
