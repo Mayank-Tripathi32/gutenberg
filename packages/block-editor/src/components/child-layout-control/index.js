@@ -10,6 +10,7 @@ import {
 	__experimentalVStack as VStack,
 	__experimentalToolsPanelItem as ToolsPanelItem,
 	__experimentalUseCustomUnits as useCustomUnits,
+	__experimentalParseQuantityAndUnitFromRawValue as parseQuantityAndUnitFromRawValue,
 	Flex,
 	FlexItem,
 } from '@wordpress/components';
@@ -182,6 +183,11 @@ function FlexControls( {
 					size="__unstable-large"
 					units={ units }
 					onChange={ ( value ) => {
+						if ( value === '' ) {
+							const [ , currentUnit ] =
+								parseQuantityAndUnitFromRawValue( flexSize );
+							value = `0${ currentUnit || 'px' }`;
+						}
 						onChange( {
 							selfStretch,
 							flexSize: value,
