@@ -136,7 +136,7 @@ function UnforwardedUnitControl(
 			typeof nextQuantityValue === 'undefined' ||
 			nextQuantityValue === null
 		) {
-			onChangeProp?.( '', changeProps );
+			onChangeProp?.( `0${ unit }`, changeProps );
 			return;
 		}
 
