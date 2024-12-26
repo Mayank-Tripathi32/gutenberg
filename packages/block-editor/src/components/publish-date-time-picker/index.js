@@ -30,6 +30,13 @@ export function PublishDateTimePicker(
 		...additionalProps,
 	};
 	const DatePickerComponent = isCompact ? TimePicker : DateTimePicker;
+
+	const handleNowClick = () => {
+		// Both TimePicker and DateTimePicker expect full ISO datetime string without timezone
+		const now = new Date().toISOString().slice( 0, 19 );
+		onChange?.( now );
+	};
+
 	return (
 		<div ref={ ref } className="block-editor-publish-date-time-picker">
 			<InspectorPopoverHeader
@@ -39,7 +46,7 @@ export function PublishDateTimePicker(
 						? [
 								{
 									label: __( 'Now' ),
-									onClick: () => onChange?.( null ),
+									onClick: handleNowClick,
 								},
 						  ]
 						: undefined
