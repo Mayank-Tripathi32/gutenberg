@@ -167,7 +167,7 @@
 		text-align: center;
 		padding: 0;
 		border-radius: 4px;
-		@media not ( prefers-reduced-motion ) {
+		@media (prefers-reduced-motion: no-preference) {
 			transition: opacity 0.2s ease;
 		}
 
@@ -282,22 +282,22 @@
 	// or faster than the scrim to give a sense of depth.
 	&.active {
 		visibility: visible;
-		@media not ( prefers-reduced-motion ) {
+		@media (prefers-reduced-motion: no-preference) {
 			animation: both turn-on-visibility 0.25s;
 		}
 		img {
-			@media not ( prefers-reduced-motion ) {
+			@media (prefers-reduced-motion: no-preference) {
 				animation: both turn-on-visibility 0.35s;
 			}
 		}
 	}
 	&.show-closing-animation {
 		&:not(.active) {
-			@media not ( prefers-reduced-motion ) {
+			@media (prefers-reduced-motion: no-preference) {
 				animation: both turn-off-visibility 0.35s;
 			}
 			img {
-				@media not ( prefers-reduced-motion ) {
+				@media (prefers-reduced-motion: no-preference) {
 					animation: both turn-off-visibility 0.25s;
 				}
 			}
