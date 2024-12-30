@@ -137,8 +137,9 @@
 	top: -2px;
 	margin: $grid-unit-10;
 	z-index: z-index(".block-library-gallery-item__inline-menu");
-	transition: box-shadow 0.2s ease-out;
-	@include reduce-motion("transition");
+	@media not ( prefers-reduced-motion ) {
+		transition: box-shadow 0.2s ease-out;
+	}
 	border-radius: $radius-small;
 	background: $white;
 	border: $border-width solid $gray-900;
