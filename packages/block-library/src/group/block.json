@@ -18,6 +18,10 @@
 		},
 		"allowedBlocks": {
 			"type": "array"
+		},
+		"isStackedOnMobile": {
+			"type": "boolean",
+			"default": false
 		}
 	},
 	"supports": {

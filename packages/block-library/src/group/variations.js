@@ -76,7 +76,10 @@ const variations = [
 		name: 'group-row',
 		title: _x( 'Row', 'single horizontal line' ),
 		description: __( 'Arrange blocks horizontally.' ),
-		attributes: { layout: { type: 'flex', flexWrap: 'nowrap' } },
+		attributes: {
+			layout: { type: 'flex', flexWrap: 'nowrap' },
+			isStackedOnMobile: true,
+		},
 		scope: [ 'block', 'inserter', 'transform' ],
 		isActive: ( blockAttributes ) =>
 			blockAttributes.layout?.type === 'flex' &&
