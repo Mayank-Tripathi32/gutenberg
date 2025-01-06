@@ -33,7 +33,15 @@
 	}
 
 	.wp-block-file__content-wrapper {
-		flex-grow: 1;
+		display: flex;
+		align-items: center;
+		gap: 1em;
+		flex-wrap: wrap;
+		width: 100%;
+
+		.block-editor-inner-blocks {
+			flex: 1;
+		}
 	}
 
 	a {
@@ -42,10 +50,5 @@
 		&:not(.wp-block-file__button) {
 			display: inline-block;
 		}
-	}
-
-	.wp-block-file__button-richtext-wrapper {
-		display: inline-block;
-		margin-left: 0.75em;
 	}
 }
