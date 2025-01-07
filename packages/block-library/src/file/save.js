@@ -1,7 +1,11 @@
 /**
  * WordPress dependencies
  */
-import { RichText, useBlockProps, InnerBlocks } from '@wordpress/block-editor';
+import {
+	RichText,
+	useBlockProps,
+	useInnerBlocksProps,
+} from '@wordpress/block-editor';
 
 export default function save( { attributes } ) {
 	const {
@@ -27,9 +31,18 @@ export default function save( { attributes } ) {
 	// actually rendered.
 	const describedById = hasFilename ? fileId : undefined;
 
+	const blockProps = useBlockProps.save( {
+		className: 'wp-block-file',
+	} );
+
+	// Use the `useInnerBlocksProps` hook to get the props for the inner blocks
+	const innerBlocksProps = useInnerBlocksProps.save( {
+		className: 'wp-block-file__button-wrapper',
+	} );
+
 	return (
 		href && (
-			<div { ...useBlockProps.save() }>
+			<div { ...blockProps }>
 				{ displayPreview && (
 					<>
 						<object
@@ -56,11 +69,7 @@ export default function save( { attributes } ) {
 						<RichText.Content value={ fileName } />
 					</a>
 				) }
-				{ showDownloadButton && (
-					<div className="wp-block-file__button_wrapper">
-						<InnerBlocks.Content />
-					</div>
-				) }
+				{ showDownloadButton && <div { ...innerBlocksProps } /> }
 			</div>
 		)
 	);

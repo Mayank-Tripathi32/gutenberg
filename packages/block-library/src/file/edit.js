@@ -21,7 +21,7 @@ import {
 	RichText,
 	useBlockProps,
 	store as blockEditorStore,
-	InnerBlocks,
+	useInnerBlocksProps,
 } from '@wordpress/block-editor';
 import { useState } from '@wordpress/element';
 import { useCopyToClipboard } from '@wordpress/compose';
@@ -185,6 +185,36 @@ function FileEdit( { attributes, isSelected, setAttributes, clientId } ) {
 
 	const displayPreviewInEditor = browserSupportsPdfs() && displayPreview;
 
+	const innerBlocksProps = useInnerBlocksProps(
+		{ className: 'wp-block-file__button-wrapper' },
+		{
+			allowedBlocks: [ 'core/buttons' ],
+			template: [
+				[
+					'core/buttons',
+					{},
+					[
+						[
+							'core/button',
+							{
+								text: __( 'Download' ),
+								lock: {
+									remove: true,
+									move: true,
+								},
+								url: href || temporaryURL,
+								download: true,
+								ariaLabel: __( 'Download button text' ),
+							},
+						],
+					],
+				],
+			],
+			templateLock: 'all',
+			renderAppender: false,
+		}
+	);
+
 	if ( ! href && ! temporaryURL ) {
 		return (
 			<div { ...blockProps }>
@@ -287,36 +317,7 @@ function FileEdit( { attributes, isSelected, setAttributes, clientId } ) {
 						}
 						href={ textLinkHref }
 					/>
-					{ showDownloadButton && (
-						<InnerBlocks
-							allowedBlocks={ [ 'core/buttons' ] }
-							template={ [
-								[
-									'core/buttons',
-									{},
-									[
-										[
-											'core/button',
-											{
-												text: __( 'Download' ),
-												lock: {
-													remove: true,
-													move: true,
-												},
-												url: href || temporaryURL,
-												download: true,
-												ariaLabel: __(
-													'Download button text'
-												),
-											},
-										],
-									],
-								],
-							] }
-							templateLock="all"
-							renderAppender={ false }
-						/>
-					) }
+					{ showDownloadButton && <div { ...innerBlocksProps } /> }
 				</div>
 			</div>
 		</>
