@@ -114,4 +114,10 @@ export type UnitControlProps = Pick< InputControlProps, 'size' > &
 		 * @ignore
 		 */
 		__shouldNotWarnDeprecated36pxSize?: boolean;
+		/**
+		 * Whether to preserve the unit when the value is empty.
+		 *
+		 * @default false
+		 */
+		shouldPreserveUnit?: boolean;
 	};

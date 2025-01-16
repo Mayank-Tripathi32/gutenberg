@@ -57,6 +57,7 @@ function UnforwardedUnitControl(
 		value: valueProp,
 		onFocus: onFocusProp,
 		__shouldNotWarnDeprecated36pxSize,
+		shouldPreserveUnit = false,
 		...props
 	} = useDeprecated36pxDefaultSizeProp( unitControlProps );
 
@@ -136,7 +137,13 @@ function UnforwardedUnitControl(
 			typeof nextQuantityValue === 'undefined' ||
 			nextQuantityValue === null
 		) {
-			onChangeProp?.( `0${ unit }`, changeProps );
+			// Add a check if we should preserve the unit when the quantity is empty.
+			if ( shouldPreserveUnit ) {
+				onChangeProp?.( `0${ unit }`, changeProps );
+				return;
+			}
+
+			onChangeProp?.( '', changeProps );
 			return;
 		}
 
