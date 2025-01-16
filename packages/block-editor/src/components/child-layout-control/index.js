@@ -187,6 +187,7 @@ function FlexControls( {
 							flexSize: value,
 						} );
 					} }
+					shouldPreserveUnit
 					value={ flexSize }
 					label={ flexResetLabel }
 					hideLabelFromVision

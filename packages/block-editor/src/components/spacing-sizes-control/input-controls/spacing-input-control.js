@@ -234,6 +234,7 @@ export default function SpacingInputControl( {
 						hideLabelFromVision
 						className="spacing-sizes-control__custom-value-input"
 						size="__unstable-large"
+						shouldPreserveUnit
 						onDragStart={ () => {
 							if ( value?.charAt( 0 ) === '-' ) {
 								setMinValue( 0 );
