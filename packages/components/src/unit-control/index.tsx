@@ -139,7 +139,13 @@ function UnforwardedUnitControl(
 		) {
 			// Add a check if we should preserve the unit when the quantity is empty.
 			if ( shouldPreserveUnit ) {
-				onChangeProp?.( `0${ unit }`, changeProps );
+				const newValue = getValidParsedQuantityAndUnit(
+					0,
+					units,
+					parsedQuantity,
+					unit
+				).join( '' );
+				onChangeProp?.( newValue, changeProps );
 				return;
 			}
 
