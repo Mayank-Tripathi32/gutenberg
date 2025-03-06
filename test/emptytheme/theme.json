@@ -16,16 +16,7 @@
 		}
 	],
 	"styles": {
-		"blocks": {
-			"core/archives": {
-				"spacing": {
-					"padding": {
-						"top": "20px",
-						"bottom": "20px"
-					}
-				}
-			}
-		}
+		"blocks": {}
 	},
 	"patterns": [ "short-text-surrounded-by-round-images", "partner-logos" ]
 }
