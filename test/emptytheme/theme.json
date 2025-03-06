@@ -17,23 +17,11 @@
 	],
 	"styles": {
 		"blocks": {
-			"core/navigation-submenu": {
-				"elements": {
-					"button": {
-						"border": {
-							"radius": "0px"
-						},
-						"color": {
-							"background": "yellow"
-						},
-						"spacing": {
-							"padding": {
-								"top": "290px",
-								"right": "20px",
-								"bottom": "20px",
-								"left": "20px"
-							}
-						}
+			"core/archives": {
+				"spacing": {
+					"padding": {
+						"top": "20px",
+						"bottom": "20px"
 					}
 				}
 			}
