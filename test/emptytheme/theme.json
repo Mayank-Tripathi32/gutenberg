@@ -17,13 +17,24 @@
 	],
 	"styles": {
 		"blocks": {
-			"core/button": {
-				"color": {
-					"background": "red",
-					"text": "white"
-				},
-				"border": {
-					"radius": "0px"
+			"core/paragraph": {
+				"elements": {
+					"button": {
+						"border": {
+							"radius": "0px"
+						},
+						"color": {
+							"background": "yellow"
+						},
+						"spacing": {
+							"padding": {
+								"top": "20px",
+								"right": "20px",
+								"bottom": "20px",
+								"left": "20px"
+							}
+						}
+					}
 				}
 			},
 			"core/navigation-submenu": {
