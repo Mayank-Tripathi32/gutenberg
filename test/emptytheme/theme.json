@@ -15,5 +15,38 @@
 			"postTypes": [ "post" ]
 		}
 	],
+	"styles": {
+		"blocks": {
+			"core/button": {
+				"color": {
+					"background": "red",
+					"text": "white"
+				},
+				"border": {
+					"radius": "0px"
+				}
+			},
+			"core/navigation-submenu": {
+				"elements": {
+					"button": {
+						"border": {
+							"radius": "0px"
+						},
+						"color": {
+							"background": "yellow"
+						},
+						"spacing": {
+							"padding": {
+								"top": "290px",
+								"right": "20px",
+								"bottom": "20px",
+								"left": "20px"
+							}
+						}
+					}
+				}
+			}
+		}
+	},
 	"patterns": [ "short-text-surrounded-by-round-images", "partner-logos" ]
 }
