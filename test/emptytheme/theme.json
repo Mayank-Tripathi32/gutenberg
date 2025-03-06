@@ -17,26 +17,6 @@
 	],
 	"styles": {
 		"blocks": {
-			"core/paragraph": {
-				"elements": {
-					"button": {
-						"border": {
-							"radius": "0px"
-						},
-						"color": {
-							"background": "yellow"
-						},
-						"spacing": {
-							"padding": {
-								"top": "20px",
-								"right": "20px",
-								"bottom": "20px",
-								"left": "20px"
-							}
-						}
-					}
-				}
-			},
 			"core/navigation-submenu": {
 				"elements": {
 					"button": {
