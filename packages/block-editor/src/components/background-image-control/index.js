@@ -19,10 +19,10 @@ import {
 	VisuallyHidden,
 	__experimentalHStack as HStack,
 	__experimentalTruncate as Truncate,
-	Dropdown,
+	// Dropdown,
 	Placeholder,
 	Spinner,
-	__experimentalDropdownContentWrapper as DropdownContentWrapper,
+	// __experimentalDropdownContentWrapper as DropdownContentWrapper,
 	Button,
 } from '@wordpress/components';
 import { __, _x, sprintf } from '@wordpress/i18n';
@@ -49,12 +49,12 @@ import {
 
 const IMAGE_BACKGROUND_TYPE = 'image';
 
-const BACKGROUND_POPOVER_PROPS = {
-	placement: 'left-start',
-	offset: 36,
-	shift: true,
-	className: 'block-editor-global-styles-background-panel__popover',
-};
+// const BACKGROUND_POPOVER_PROPS = {
+// 	placement: 'left-start',
+// 	offset: 36,
+// 	shift: true,
+// 	className: 'block-editor-global-styles-background-panel__popover',
+// };
 const noop = () => {};
 
 /**
@@ -181,57 +181,53 @@ function InspectorImagePreviewItem( {
 	);
 }
 
-function BackgroundControlsPanel( {
-	label,
-	filename,
-	url: imgUrl,
-	children,
-	onToggle: onToggleCallback = noop,
-	hasImageValue,
-} ) {
-	if ( ! hasImageValue ) {
-		return;
-	}
+// function BackgroundControlsPanel( {
+// 	label,
+// 	filename,
+// 	url: imgUrl,
+// 	children,
+// 	onToggle: onToggleCallback = noop,
+// 	hasImageValue,
+// } ) {
+// 	const imgLabel =
+// 		label || getFilename( imgUrl ) || __( 'Add background image' );
 
-	const imgLabel =
-		label || getFilename( imgUrl ) || __( 'Add background image' );
-
-	return (
-		<Dropdown
-			popoverProps={ BACKGROUND_POPOVER_PROPS }
-			renderToggle={ ( { onToggle, isOpen } ) => {
-				const toggleProps = {
-					onClick: onToggle,
-					className:
-						'block-editor-global-styles-background-panel__dropdown-toggle',
-					'aria-expanded': isOpen,
-					'aria-label': __(
-						'Background size, position and repeat options.'
-					),
-					isOpen,
-				};
-				return (
-					<InspectorImagePreviewItem
-						imgUrl={ imgUrl }
-						filename={ filename }
-						label={ imgLabel }
-						toggleProps={ toggleProps }
-						as="button"
-						onToggleCallback={ onToggleCallback }
-					/>
-				);
-			} }
-			renderContent={ () => (
-				<DropdownContentWrapper
-					className="block-editor-global-styles-background-panel__dropdown-content-wrapper"
-					paddingSize="medium"
-				>
-					{ children }
-				</DropdownContentWrapper>
-			) }
-		/>
-	);
-}
+// 	return (
+// 		<Dropdown
+// 			popoverProps={ BACKGROUND_POPOVER_PROPS }
+// 			renderToggle={ ( { onToggle, isOpen } ) => {
+// 				const toggleProps = {
+// 					onClick: onToggle,
+// 					className:
+// 						'block-editor-global-styles-background-panel__dropdown-toggle',
+// 					'aria-expanded': isOpen,
+// 					'aria-label': __(
+// 						'Background size, position and repeat options.'
+// 					),
+// 					isOpen,
+// 				};
+// 				return (
+// 					<InspectorImagePreviewItem
+// 						imgUrl={ imgUrl }
+// 						filename={ filename }
+// 						label={ imgLabel }
+// 						toggleProps={ toggleProps }
+// 						as="button"
+// 						onToggleCallback={ onToggleCallback }
+// 					/>
+// 				);
+// 			} }
+// 			renderContent={ () => (
+// 				<DropdownContentWrapper
+// 					className="block-editor-global-styles-background-panel__dropdown-content-wrapper"
+// 					paddingSize="medium"
+// 				>
+// 					{ children }
+// 				</DropdownContentWrapper>
+// 			) }
+// 		/>
+// 	);
+// }
 
 function LoadingSpinner() {
 	return (
@@ -249,6 +245,7 @@ function BackgroundImageControls( {
 	onResetImage = noop,
 	displayInPanel,
 	defaultValues,
+	popoverRender,
 } ) {
 	const [ isUploading, setIsUploading ] = useState( false );
 	const { getSettings } = useSelect( blockEditorStore );
@@ -397,17 +394,20 @@ function BackgroundImageControls( {
 					onResetImage();
 				} }
 			>
-				{ canRemove && (
-					<MenuItem
-						onClick={ () => {
-							closeAndFocus();
-							onRemove();
-							onRemoveImage();
-						} }
-					>
-						{ __( 'Remove' ) }
-					</MenuItem>
-				) }
+				<VStack spacing={ 3 } className="single-column">
+					{ popoverRender }
+					{ canRemove && (
+						<MenuItem
+							onClick={ () => {
+								closeAndFocus();
+								onRemove();
+								onRemoveImage();
+							} }
+						>
+							{ __( 'Remove' ) }
+						</MenuItem>
+					) }
+				</VStack>
 			</MediaReplaceFlow>
 			<DropZone
 				onFilesDrop={ onFilesDrop }
@@ -678,9 +678,9 @@ export default function BackgroundImagePanel( {
 	const resetBackground = () =>
 		onChange( setImmutably( value, [ 'background' ], {} ) );
 
-	const { title, url } = value?.background?.backgroundImage || {
-		...resolvedInheritedValue?.background?.backgroundImage,
-	};
+	// const { title, url } = value?.background?.backgroundImage || {
+	// 	...resolvedInheritedValue?.background?.backgroundImage,
+	// };
 	const hasImageValue =
 		hasBackgroundImageValue( value ) ||
 		hasBackgroundImageValue( resolvedInheritedValue );
@@ -707,48 +707,30 @@ export default function BackgroundImagePanel( {
 				}
 			) }
 		>
-			{ shouldShowBackgroundImageControls ? (
-				<BackgroundControlsPanel
-					label={ title }
-					filename={ title }
-					url={ url }
-					onToggle={ setIsDropDownOpen }
-					hasImageValue={ hasImageValue }
-				>
-					<VStack spacing={ 3 } className="single-column">
-						<BackgroundImageControls
-							onChange={ onChange }
-							style={ value }
-							inheritedValue={ resolvedInheritedValue }
-							displayInPanel
-							onResetImage={ () => {
-								setIsDropDownOpen( false );
-								resetBackground();
-							} }
-							onRemoveImage={ () => setIsDropDownOpen( false ) }
-							defaultValues={ defaultValues }
-						/>
-						<BackgroundSizeControls
-							onChange={ onChange }
-							style={ value }
-							defaultValues={ defaultValues }
-							inheritedValue={ resolvedInheritedValue }
-						/>
-					</VStack>
-				</BackgroundControlsPanel>
-			) : (
-				<BackgroundImageControls
-					onChange={ onChange }
-					style={ value }
-					inheritedValue={ resolvedInheritedValue }
-					defaultValues={ defaultValues }
-					onResetImage={ () => {
-						setIsDropDownOpen( false );
-						resetBackground();
-					} }
-					onRemoveImage={ () => setIsDropDownOpen( false ) }
-				/>
-			) }
+			<BackgroundImageControls
+				onChange={ onChange }
+				style={ value }
+				inheritedValue={ resolvedInheritedValue }
+				displayInPanel
+				onResetImage={ () => {
+					setIsDropDownOpen( false );
+					resetBackground();
+				} }
+				onRemoveImage={ () => setIsDropDownOpen( false ) }
+				defaultValues={ defaultValues }
+				popoverRender={
+					<>
+						{ shouldShowBackgroundImageControls && (
+							<BackgroundSizeControls
+								onChange={ onChange }
+								style={ value }
+								defaultValues={ defaultValues }
+								inheritedValue={ resolvedInheritedValue }
+							/>
+						) }
+					</>
+				}
+			/>
 		</div>
 	);
 }
