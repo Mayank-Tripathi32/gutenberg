@@ -48,6 +48,7 @@ const InsertFromURLPopover = ( {
 				__next40pxDefaultSize
 				label={ __( 'URL' ) }
 				type="url"
+				className="block-editor-media-placeholder__url-input-form__input"
 				hideLabelFromVision
 				placeholder={ __( 'Paste or type URL' ) }
 				onChange={ onChange }
