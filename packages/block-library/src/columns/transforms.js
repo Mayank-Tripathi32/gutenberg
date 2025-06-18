@@ -105,6 +105,75 @@ const transforms = {
 			},
 		},
 	],
+	to: [
+		{
+			type: 'block',
+			blocks: [ 'core/group' ],
+			priority: 1,
+			transform: ( attributes, innerBlocks ) => {
+				// Transform each column's content into a group block
+				const gridItems = innerBlocks.map( ( column ) => {
+					const columnContent = column.innerBlocks;
+
+					// If the column already contains a single group block, use it directly
+					if (
+						columnContent.length === 1 &&
+						columnContent[ 0 ].name === 'core/group'
+					) {
+						return columnContent[ 0 ];
+					}
+
+					// Otherwise, wrap the column content in a new group block
+					return createBlock( 'core/group', {}, columnContent );
+				} );
+
+				// Create a grid layout group block
+				return createBlock(
+					'core/group',
+					{
+						...attributes,
+						layout: { type: 'grid' },
+					},
+					gridItems
+				);
+			},
+			isMatch: ( attributes, block ) => {
+				const { innerBlocks } = block;
+
+				// Don't transform if there are no columns
+				if ( ! innerBlocks || innerBlocks.length === 0 ) {
+					return false;
+				}
+
+				// Only transform if columns have equal or no explicit widths
+				// This prevents transformation of custom-sized column layouts
+				const columnWidths = innerBlocks.map(
+					( column ) => column.attributes?.width
+				);
+				const hasCustomWidths = columnWidths.some(
+					( width ) => width && width !== ''
+				);
+
+				if ( hasCustomWidths ) {
+					// Check if all widths are equal (accounting for rounding)
+					const expectedWidth = 100 / innerBlocks.length;
+					const tolerance = 1; // Allow 1% tolerance for rounding differences
+
+					return columnWidths.every( ( width ) => {
+						const numericWidth =
+							parseFloat( width ) || expectedWidth;
+						return (
+							Math.abs( numericWidth - expectedWidth ) <=
+							tolerance
+						);
+					} );
+				}
+
+				// Allow transformation for columns without explicit widths (equal by default)
+				return true;
+			},
+		},
+	],
 	ungroup: ( attributes, innerBlocks ) =>
 		innerBlocks.flatMap( ( innerBlock ) => innerBlock.innerBlocks ),
 };
