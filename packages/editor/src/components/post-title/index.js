@@ -11,7 +11,7 @@ import { decodeEntities } from '@wordpress/html-entities';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { store as blockEditorStore } from '@wordpress/block-editor';
 import { ENTER } from '@wordpress/keycodes';
-import { pasteHandler } from '@wordpress/blocks';
+import { createBlock, pasteHandler } from '@wordpress/blocks';
 import {
 	privateApis as richTextPrivateApis,
 	create,
@@ -128,6 +128,30 @@ const PostTitle = forwardRef( ( _, forwardedRef ) => {
 			// Some browsers like UC Browser paste plain text by default and
 			// don't support clipboardData at all, so allow default
 			// behaviour.
+			return;
+		}
+
+		// When the clipboard contains only plain text, bypass `pasteHandler`
+		// so its Markdown auto-conversion does not transform syntax like
+		// `# foo` into a heading and strip the original characters. The
+		// title field is treated as plain text; if the paste spans multiple
+		// lines, the first line becomes the title and the rest are inserted
+		// as paragraph blocks below. See #78956.
+		if ( plainText && ! html ) {
+			event.preventDefault();
+			const [ firstLine, ...restLines ] =
+				plainText.split( REGEXP_NEWLINES );
+			if ( firstLine ) {
+				onChange( insert( value, firstLine ) );
+			}
+			const restBlocks = restLines
+				.filter( ( line ) => line.trim() !== '' )
+				.map( ( line ) =>
+					createBlock( 'core/paragraph', { content: line } )
+				);
+			if ( restBlocks.length ) {
+				onInsertBlockAfter( restBlocks );
+			}
 			return;
 		}
 
