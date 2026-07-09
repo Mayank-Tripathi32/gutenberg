@@ -1,0 +1,9 @@
+.wp-block-post-title {
+	// In the editor the linked title is rendered with RichText, which requires an
+	// inline-block container to avoid a console warning. This is not needed on the
+	// front end, where keeping the link inline lets it wrap around floats and
+	// `shape-outside`.
+	:where(a) {
+		display: inline-block;
+	}
+}

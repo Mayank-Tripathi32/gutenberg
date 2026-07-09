@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Bug Fixes
+
+-   Post Title: Load the title link's `display: inline-block` only in the editor, where RichText requires it, so the front-end link renders inline and can wrap around floats and `shape-outside` ([#79372](https://github.com/WordPress/gutenberg/issues/79372)).
+
 ## 10.1.0 (2026-07-01)
 
 ## 10.0.0 (2026-06-24)
