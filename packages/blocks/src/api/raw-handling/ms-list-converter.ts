@@ -37,7 +37,7 @@ export default function msListConverter( node: Node, doc: Document ): void {
 	const listType = listNode.nodeName;
 	const listItem = doc.createElement( 'li' );
 
-	let receivingNode: Node = listNode;
+	let receivingNode: Element = listNode;
 
 	// Add content.
 	listItem.innerHTML = deepFilterHTML( element.innerHTML, [ msListIgnore ] );
@@ -45,13 +45,21 @@ export default function msListConverter( node: Node, doc: Document ): void {
 	const matches = /mso-list\s*:[^;]+level([0-9]+)/i.exec( style );
 	let level = matches ? parseInt( matches[ 1 ], 10 ) - 1 || 0 : 0;
 
-	// Change pointer depending on indentation level.
+	// Change pointer depending on indentation level. Only descend into element
+	// children: when the level jumps by more than one, the last child is the
+	// previous item's text node, and a list cannot be appended to a text node.
 	while ( level-- ) {
-		receivingNode = receivingNode.lastChild || receivingNode;
+		const child = receivingNode.lastElementChild;
+
+		if ( ! child ) {
+			break;
+		}
+
+		receivingNode = child;
 
 		// If it's a list, move pointer to the last item.
 		if ( isList( receivingNode ) ) {
-			receivingNode = receivingNode.lastChild || receivingNode;
+			receivingNode = receivingNode.lastElementChild ?? receivingNode;
 		}
 	}
 

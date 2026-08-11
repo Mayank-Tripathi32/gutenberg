@@ -60,10 +60,14 @@ export default function phrasingContentReducer(
 			anchor.id = anchor.name;
 		}
 
-		// Keeps id only if there is an internal link pointing to it
+		// Keeps id only if there is an internal link pointing to it. The id is
+		// escaped because it is author input: an unescaped quote would produce
+		// an invalid selector and throw, discarding the whole paste.
 		if (
 			anchor.id &&
-			! anchor.ownerDocument.querySelector( `[href="#${ anchor.id }"]` )
+			! anchor.ownerDocument.querySelector(
+				`[href="#${ CSS.escape( anchor.id ) }"]`
+			)
 		) {
 			anchor.removeAttribute( 'id' );
 		}

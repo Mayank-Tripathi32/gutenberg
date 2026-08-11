@@ -1,5 +1,8 @@
 import { pasteHandler, serialize } from '@wordpress/blocks';
 import { init as initAndRegisterImageBlock } from '../../../../../block-library/src/image';
+import { init as initAndRegisterListBlock } from '../../../../../block-library/src/list';
+import { init as initAndRegisterListItemBlock } from '../../../../../block-library/src/list-item';
+import { init as initAndRegisterParagraphBlock } from '../../../../../block-library/src/paragraph';
 import { init as initAndRegisterTableBlock } from '../../../../../block-library/src/table';
 import { init as initAndRegisterVideoBlock } from '../../../../../block-library/src/video';
 
@@ -447,5 +450,57 @@ describe( 'pasteHandler — core/image', () => {
 		expect( result.name ).toBe( 'core/image' );
 		expect( result.attributes.width ).toBeUndefined();
 		expect( result.attributes.height ).toBeUndefined();
+	} );
+} );
+
+describe( 'pasteHandler — malformed markup', () => {
+	beforeAll( () => {
+		initAndRegisterListBlock();
+		initAndRegisterListItemBlock();
+		initAndRegisterParagraphBlock();
+	} );
+
+	const msListItem = ( level, text ) =>
+		`<p style="mso-list:l0 level${ level } lfo1"><span style="mso-list:Ignore">* </span>${ text }</p>`;
+
+	it( 'keeps the content when a list indentation level jumps by more than one', () => {
+		// Walking the indent pointer used to descend into the previous item's
+		// text node, and appending to a text node throws HierarchyRequestError.
+		const result = pasteHandler( {
+			HTML: msListItem( 1, 'one' ) + msListItem( 3, 'three' ),
+			mode: 'BLOCKS',
+		} );
+
+		expect( console ).toHaveLogged();
+
+		const serialized = serialize( result );
+		expect( serialized ).toContain( 'one' );
+		expect( serialized ).toContain( 'three' );
+	} );
+
+	it( 'keeps the content when an anchor id contains a quote', () => {
+		// A quote in the id used to build an invalid attribute selector, which
+		// throws and discards the whole pasted document.
+		const result = pasteHandler( {
+			HTML: '<p><a id="a&quot;b">anchor</a> and some text</p>',
+			mode: 'BLOCKS',
+		} );
+
+		expect( console ).toHaveLogged();
+
+		expect( serialize( result ) ).toContain( 'and some text' );
+	} );
+
+	it( 'keeps an anchor id containing a quote when it is linked to', () => {
+		const result = pasteHandler( {
+			HTML:
+				'<p><a id="a&quot;b">anchor</a></p>' +
+				'<p><a href="#a&quot;b">link</a></p>',
+			mode: 'BLOCKS',
+		} );
+
+		expect( console ).toHaveLogged();
+
+		expect( serialize( result ) ).toContain( 'a&quot;b' );
 	} );
 } );

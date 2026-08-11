@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Bug Fix
+
+-   Paste: Stop discarding the whole paste when an `mso-list` indentation level jumps by more than one, or when an anchor `id` contains a quote.
+
 ### Internal
 
 -   Update `hpq` to 1.4.0 for its bundled TypeScript types ([#81199](https://github.com/WordPress/gutenberg/pull/81199)).
