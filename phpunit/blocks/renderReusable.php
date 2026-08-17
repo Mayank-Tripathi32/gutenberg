@@ -19,6 +19,20 @@ class Test_Blocks_RenderReusable extends WP_UnitTestCase {
 	 */
 	protected static $block_id;
 
+	/**
+	 * Test block ID for a synced pattern holding a Shortcode block.
+	 *
+	 * @var int
+	 */
+	protected static $shortcode_block_id;
+
+	/**
+	 * Number of times the test shortcode has been expanded.
+	 *
+	 * @var int
+	 */
+	protected $shortcode_run_count = 0;
+
 	public static function wpSetUpBeforeClass( $factory ) {
 		register_block_bindings_source(
 			'test/block-binding',
@@ -39,11 +53,39 @@ class Test_Blocks_RenderReusable extends WP_UnitTestCase {
 				'post_content' => '<!-- wp:core/paragraph {"metadata":{"bindings":{"content":{"source":"test/block-binding","args":{"key":"ignored"}}}}} --><p>Hello world!</p><!-- /wp:core/paragraph -->',
 			)
 		);
+
+		self::$shortcode_block_id = $factory->post->create(
+			array(
+				'post_type'    => 'wp_block',
+				'post_status'  => 'publish',
+				'post_title'   => 'Test Shortcode Block',
+				'post_content' => '<!-- wp:shortcode -->[gutenberg_test_shortcode]<!-- /wp:shortcode -->',
+			)
+		);
 	}
 
 	public static function wpTearDownAfterClass() {
 		wp_delete_post( self::$block_id, true );
+		wp_delete_post( self::$shortcode_block_id, true );
 		unregister_block_bindings_source( 'test/block-binding' );
+	}
+
+	public function set_up() {
+		parent::set_up();
+
+		$this->shortcode_run_count = 0;
+		add_shortcode(
+			'gutenberg_test_shortcode',
+			function () {
+				++$this->shortcode_run_count;
+				return 'Expanded shortcode';
+			}
+		);
+	}
+
+	public function tear_down() {
+		remove_shortcode( 'gutenberg_test_shortcode' );
+		parent::tear_down();
 	}
 
 	/**
@@ -64,5 +106,45 @@ class Test_Blocks_RenderReusable extends WP_UnitTestCase {
 
 		$output = $synced_pattern_block_instance->render();
 		$this->assertSame( '<p class="wp-block-paragraph">Custom content set from block context</p>', $output );
+	}
+
+	/**
+	 * A synced pattern in a template is rendered outside `the_content`, so nothing
+	 * else expands the shortcodes it contains.
+	 *
+	 * @see https://github.com/WordPress/gutenberg/issues/68214
+	 */
+	public function test_render_expands_shortcodes_outside_the_content() {
+		$synced_pattern_block_instance = new WP_Block(
+			array(
+				'blockName' => 'core/block',
+				'attrs'     => array(
+					'ref' => self::$shortcode_block_id,
+				),
+			)
+		);
+
+		$output = $synced_pattern_block_instance->render();
+
+		$this->assertStringContainsString( 'Expanded shortcode', $output );
+		$this->assertStringNotContainsString( '[gutenberg_test_shortcode]', $output );
+		$this->assertSame( 1, $this->shortcode_run_count, 'The shortcode should be expanded exactly once.' );
+	}
+
+	/**
+	 * `the_content` expands shortcodes on behalf of every block in the post, so a
+	 * synced pattern rendered inside it must leave them alone.
+	 *
+	 * @see https://github.com/WordPress/gutenberg/issues/68214
+	 */
+	public function test_render_defers_to_the_content_for_shortcodes() {
+		$output = apply_filters(
+			'the_content',
+			'<!-- wp:block {"ref":' . self::$shortcode_block_id . '} /-->'
+		);
+
+		$this->assertStringContainsString( 'Expanded shortcode', $output );
+		$this->assertStringNotContainsString( '[gutenberg_test_shortcode]', $output );
+		$this->assertSame( 1, $this->shortcode_run_count, 'The shortcode should be expanded exactly once.' );
 	}
 }

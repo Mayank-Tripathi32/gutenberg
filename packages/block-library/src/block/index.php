@@ -88,6 +88,19 @@ function render_block_core_block( $attributes, $content, $block_instance ) {
 	$content = $block_instance->render( array( 'dynamic' => false ) );
 	unset( $seen_refs[ $attributes['ref'] ] );
 
+	/*
+	 * The Shortcode block leaves its shortcode in the markup for `the_content` to
+	 * expand, which is how shortcodes get processed for every block in a post. A
+	 * synced pattern rendered outside that filter -- in a template, for example --
+	 * never gets that pass, so the shortcode reaches the front end unexpanded.
+	 * Run it here when nothing else is going to, matching the order `the_content`
+	 * uses: blocks first, then shortcodes.
+	 */
+	if ( ! doing_filter( 'the_content' ) ) {
+		$content = shortcode_unautop( $content );
+		$content = do_shortcode( $content );
+	}
+
 	return $content;
 }
 
