@@ -147,4 +147,48 @@ class Test_Blocks_RenderReusable extends WP_UnitTestCase {
 		$this->assertStringNotContainsString( '[gutenberg_test_shortcode]', $output );
 		$this->assertSame( 1, $this->shortcode_run_count, 'The shortcode should be expanded exactly once.' );
 	}
+
+	/**
+	 * Shortcode expansion is limited to the pattern's saved markup. Content that
+	 * dynamic blocks inject during rendering (comment text, post content, pattern
+	 * overrides) is not trusted shortcode input, so it must never be expanded.
+	 *
+	 * @see https://github.com/WordPress/gutenberg/issues/68214
+	 */
+	public function test_render_does_not_expand_shortcodes_in_dynamic_block_output() {
+		register_block_type(
+			'tests/shortcode-emitter',
+			array(
+				'render_callback' => function () {
+					return '<p>[gutenberg_test_shortcode]</p>';
+				},
+			)
+		);
+
+		$block_id = self::factory()->post->create(
+			array(
+				'post_type'    => 'wp_block',
+				'post_status'  => 'publish',
+				'post_title'   => 'Test Dynamic Output Block',
+				'post_content' => '<!-- wp:tests/shortcode-emitter /-->',
+			)
+		);
+
+		$synced_pattern_block_instance = new WP_Block(
+			array(
+				'blockName' => 'core/block',
+				'attrs'     => array(
+					'ref' => $block_id,
+				),
+			)
+		);
+
+		$output = $synced_pattern_block_instance->render();
+
+		unregister_block_type( 'tests/shortcode-emitter' );
+		wp_delete_post( $block_id, true );
+
+		$this->assertStringContainsString( '[gutenberg_test_shortcode]', $output, 'Shortcodes in dynamic block output should not be expanded.' );
+		$this->assertSame( 0, $this->shortcode_run_count, 'The shortcode should not run for dynamic block output.' );
+	}
 }
