@@ -913,8 +913,21 @@ class WP_Duotone_Gutenberg {
 
 			$duotone_attr = $block['attrs']['style']['color']['duotone'];
 			$is_preset    = is_string( $duotone_attr ) && self::is_preset( $duotone_attr );
-			$is_css       = is_string( $duotone_attr ) && ! $is_preset;
-			$is_custom    = is_array( $duotone_attr );
+
+			/*
+			 * An attribute that names a preset still names one when that preset is not
+			 * registered, which is what happens after switching to a style variation that
+			 * does not define it. It is not a CSS string: running it through sanitize_key()
+			 * below would turn `var:preset|duotone|blue-orange` into a class such as
+			 * `wp-duotone-varpresetduotoneblue-orange-2` and emit an invalid filter
+			 * declaration alongside it. There is no duotone to apply, so apply none.
+			 */
+			$is_unregistered_preset = ! $is_preset
+				&& is_string( $duotone_attr )
+				&& '' !== self::get_slug_from_attribute( $duotone_attr );
+
+			$is_css    = is_string( $duotone_attr ) && ! $is_preset && ! $is_unregistered_preset;
+			$is_custom = is_array( $duotone_attr );
 
 			if ( $is_preset ) {
 				$slug         = self::get_slug_from_attribute( $duotone_attr ); // e.g. 'blue-orange'.

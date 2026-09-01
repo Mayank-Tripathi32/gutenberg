@@ -37,6 +37,51 @@ class WP_Duotone_Gutenberg_Test extends WP_UnitTestCase {
 		$this->assertMatchesRegularExpression( $expected, WP_Duotone_Gutenberg::render_duotone_support( $block_content, $block, $wp_block ) );
 	}
 
+	/**
+	 * A preset reference stays a preset reference when the preset is not registered,
+	 * which is what happens after switching to a style variation that does not define
+	 * it. It must not be mistaken for a CSS string and sanitized into a class name.
+	 *
+	 * @dataProvider data_gutenberg_render_duotone_support_unregistered_preset
+	 *
+	 * @see https://github.com/WordPress/gutenberg/issues/67459
+	 *
+	 * @param string $duotone_attr The block's duotone attribute.
+	 */
+	public function test_gutenberg_render_duotone_support_unregistered_preset( $duotone_attr ) {
+		$block         = array(
+			'blockName' => 'core/image',
+			'attrs'     => array( 'style' => array( 'color' => array( 'duotone' => $duotone_attr ) ) ),
+		);
+		$wp_block      = new WP_Block( $block );
+		$block_content = '<figure class="wp-block-image size-full"><img src="/my-image.jpg" /></figure>';
+
+		$actual = WP_Duotone_Gutenberg::render_duotone_support( $block_content, $block, $wp_block );
+
+		$this->assertStringNotContainsString(
+			'varpresetduotone',
+			$actual,
+			'The preset reference should not be sanitized into a class name.'
+		);
+		$this->assertSame(
+			$block_content,
+			$actual,
+			'No duotone class should be added when the preset is not registered.'
+		);
+	}
+
+	/**
+	 * Data provider.
+	 *
+	 * @return array
+	 */
+	public function data_gutenberg_render_duotone_support_unregistered_preset() {
+		return array(
+			'preset shorthand' => array( 'var:preset|duotone|not-registered' ),
+			'css var'          => array( 'var(--wp--preset--duotone--not-registered)' ),
+		);
+	}
+
 	public function test_gutenberg_render_duotone_support_custom() {
 		$block         = array(
 			'blockName' => 'core/image',
