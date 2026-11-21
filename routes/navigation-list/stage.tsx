@@ -6,7 +6,7 @@ import type { Post } from '@wordpress/core-data';
 import { Page } from '@wordpress/admin-ui';
 import { __ } from '@wordpress/i18n';
 import { useView, useViewConfig } from '@wordpress/views';
-import { DataViews } from '@wordpress/dataviews';
+import { DataViews, filterSortAndPaginate } from '@wordpress/dataviews';
 import { Button } from '@wordpress/components';
 import { privateApis as editorPrivateApis } from '@wordpress/editor';
 import { unlock } from '@wordpress/routes-lock-unlock';
@@ -21,12 +21,17 @@ const { usePostActions, usePostFields } = unlock( editorPrivateApis );
 
 const NAVIGATION_POST_TYPE = 'wp_navigation';
 
+// Fetch every navigation menu, with the same query the route loader uses so
+// the records are shared. The view's search, sorting and pagination are
+// applied client-side by `filterSortAndPaginate`.
 const PRELOADED_NAVIGATION_MENUS_QUERY = {
-	per_page: 100,
+	per_page: -1,
 	status: [ 'publish', 'draft' ],
 	order: 'desc',
 	orderby: 'date',
 };
+
+const EMPTY_ARRAY: Post[] = [];
 
 function getItemId( item: Post ) {
 	return item.id.toString();
@@ -102,12 +107,7 @@ function NavigationListView( {
 		onChangeQueryParams: handleQueryParamsChange,
 	} );
 
-	const {
-		records: navigationMenus,
-		totalItems,
-		totalPages,
-		isResolving,
-	} = useEntityRecordsWithPermissions(
+	const { records, isResolving } = useEntityRecordsWithPermissions(
 		'postType',
 		NAVIGATION_POST_TYPE,
 		PRELOADED_NAVIGATION_MENUS_QUERY
@@ -116,6 +116,17 @@ function NavigationListView( {
 	const fields = usePostFields( {
 		postType: NAVIGATION_POST_TYPE,
 	} );
+
+	// Apply the view's search, sorting and pagination on the client side.
+	const { data: navigationMenus, paginationInfo } = useMemo(
+		() =>
+			filterSortAndPaginate(
+				( records ?? EMPTY_ARRAY ) as Post[],
+				view,
+				fields ?? []
+			),
+		[ records, view, fields ]
+	);
 	const [ showAddModal, setShowAddModal ] = useState( false );
 
 	const editAction = useEditNavigationAction();
@@ -132,13 +143,10 @@ function NavigationListView( {
 	const selection =
 		( searchParams.ids ?? [] ).map( ( id: number ) => id.toString() ) ?? [];
 
-	// Get the first navigation from the canvas loader if no selection
-	const firstNavigationId = useMemo( () => {
-		if ( navigationMenus && navigationMenus.length > 0 ) {
-			return navigationMenus[ 0 ].id.toString();
-		}
-		return null;
-	}, [ navigationMenus ] );
+	// Select the first navigation menu of the list if there is no selection,
+	// which is also the one the canvas loader previews.
+	const firstNavigationId =
+		navigationMenus.length > 0 ? getItemId( navigationMenus[ 0 ] ) : null;
 
 	if ( selection.length === 0 && firstNavigationId ) {
 		selection.push( firstNavigationId );
@@ -172,10 +180,7 @@ function NavigationListView( {
 					onChangeView={ updateView }
 					isLoading={ isResolving || ! fields }
 					actions={ actions }
-					paginationInfo={ {
-						totalItems,
-						totalPages,
-					} }
+					paginationInfo={ paginationInfo }
 					defaultLayouts={ defaultLayouts }
 					getItemId={ getItemId }
 					selection={ selection }

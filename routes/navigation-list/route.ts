@@ -1,8 +1,14 @@
 import { resolveSelect } from '@wordpress/data';
 import { store as coreStore } from '@wordpress/core-data';
+import type { Post } from '@wordpress/core-data';
+import { filterSortAndPaginate } from '@wordpress/dataviews';
 import { __ } from '@wordpress/i18n';
 import { notFound } from '@wordpress/route';
-import { loadNavigationViewConfig } from './view-utils';
+import {
+	ensureView,
+	loadNavigationFields,
+	loadNavigationViewConfig,
+} from './view-utils';
 
 const NAVIGATION_POST_TYPE = 'wp_navigation';
 
@@ -32,14 +38,31 @@ export const route = {
 			search?: string;
 		};
 	} ) => {
-		const navigations = ( await resolveSelect( coreStore ).getEntityRecords(
-			'postType',
-			NAVIGATION_POST_TYPE,
-			PRELOADED_NAVIGATION_MENUS_QUERY
-		) ) as { id: number }[] | null;
-		const firstNavigation = navigations?.[ 0 ];
+		// Preview the navigation menu the stage selects by default: the first
+		// row after applying the view's search, sorting and pagination to
+		// every menu (the same query the stage uses, so the records are
+		// shared), over the same field definitions the stage renders.
+		const [ navigations, view, fields ] = await Promise.all( [
+			resolveSelect( coreStore ).getEntityRecords(
+				'postType',
+				NAVIGATION_POST_TYPE,
+				PRELOADED_NAVIGATION_MENUS_QUERY
+			) as Promise< Post[] | null >,
+			ensureView( { page: search.page, search: search.search } ),
+			loadNavigationFields(),
+		] );
 
-		if ( ! firstNavigation ) {
+		if ( ! navigations?.length ) {
+			return { postType: NAVIGATION_POST_TYPE, isPreview: true };
+		}
+
+		const firstNavigation = filterSortAndPaginate(
+			navigations,
+			view,
+			fields
+		).data[ 0 ];
+
+		if ( ! search.ids && ! firstNavigation ) {
 			return { postType: NAVIGATION_POST_TYPE, isPreview: true };
 		}
 

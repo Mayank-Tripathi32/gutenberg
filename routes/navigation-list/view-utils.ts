@@ -1,6 +1,8 @@
 import { resolveSelect } from '@wordpress/data';
 import { store as coreStore } from '@wordpress/core-data';
-import type { View, SupportedLayouts } from '@wordpress/dataviews';
+import type { Post } from '@wordpress/core-data';
+import { store as editorStore } from '@wordpress/editor';
+import type { View, Field, SupportedLayouts } from '@wordpress/dataviews';
 import { loadView } from '@wordpress/views';
 import { unlock } from '@wordpress/routes-lock-unlock';
 
@@ -84,4 +86,27 @@ export async function ensureView( search?: {
 		activeViewOverrides: getActiveViewOverrides( viewList, 'all' ),
 		queryParams: search,
 	} );
+}
+
+/**
+ * Loads the fields the server registers for the navigation post type, for use
+ * in the route loader that runs outside React.
+ *
+ * `usePostFields` in the stage shares this resolution, so it renders the
+ * fields the loader loaded. It also reports a failure, which is why this
+ * resolves to no fields instead of rejecting: the canvas then previews the
+ * first navigation menu of the unsorted, unfiltered list rather than failing
+ * the whole route.
+ *
+ * @return The field definitions the stage renders.
+ */
+export async function loadNavigationFields(): Promise< Field< Post >[] > {
+	try {
+		return await unlock( resolveSelect( editorStore ) ).getEntityFields(
+			'postType',
+			NAVIGATION_POST_TYPE
+		);
+	} catch {
+		return [];
+	}
 }
