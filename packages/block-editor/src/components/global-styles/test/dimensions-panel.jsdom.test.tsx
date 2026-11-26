@@ -739,7 +739,7 @@ describe( 'DimensionsPanel — per-control placeholder pattern', () => {
 		} );
 	} );
 
-	// The min-dimension DimensionControls (minHeight, minWidth) use the
+	// The DimensionControls (minHeight, minWidth, height, width) use the
 	// local-then-inherited pattern: the inherited value is rendered as the
 	// control's value (so the unit parses from it) and marked at-rest, rather
 	// than shown as a placeholder. It is only committed to local on user
@@ -758,6 +758,20 @@ describe( 'DimensionsPanel — per-control placeholder pattern', () => {
 			label: /minimum width/i,
 			inherited: '200px',
 			expected: 200,
+		},
+		{
+			name: 'height',
+			leaf: 'height',
+			label: /^height$/i,
+			inherited: '240px',
+			expected: 240,
+		},
+		{
+			name: 'width',
+			leaf: 'width',
+			label: /^width$/i,
+			inherited: '640px',
+			expected: 640,
 		},
 	] )(
 		'DimensionControl ($name)',
@@ -783,23 +797,6 @@ describe( 'DimensionsPanel — per-control placeholder pattern', () => {
 			} );
 		}
 	);
-
-	// The plain `width` DimensionControl still uses the native-placeholder
-	// pattern for its inherited value.
-	describe( 'DimensionControl (width)', () => {
-		it( 'renders an inherited value as placeholder when `value` is empty', () => {
-			renderPanel( {
-				value: {},
-				inheritedValue: { dimensions: { width: '640px' } },
-				settings: settingsWithDimensions,
-			} );
-
-			const input = getDimensionInput( /^width$/i );
-			expect( input ).toBeDefined();
-			expect( input ).toHaveValue( null );
-			expect( input ).toHaveAttribute( 'placeholder', '640px' );
-		} );
-	} );
 
 	describe( 'minHeight (DimensionControl)', () => {
 		it( 'renders a locally-set minHeight as the value with no placeholder, even when `inheritedValue` also defines it', () => {

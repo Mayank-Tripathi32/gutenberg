@@ -1123,11 +1123,16 @@ export default function DimensionsPanel( {
 				>
 					<DimensionControl
 						label={ __( 'Height' ) }
-						value={ localHeightValue }
+						// Local-then-inherited, so the unit parses from the
+						// inherited value rather than defaulting to px.
+						value={ localHeightValue ?? inheritedHeightValue }
 						onChange={ setHeightValue }
 						placeholder={
 							isHeightPlaceholder
-								? inheritedHeightValue
+								? // The input renders the number as is.
+									( getNumericPlaceholder(
+										inheritedHeightValue
+									) as unknown as string )
 								: undefined
 						}
 						dimensionSizes={ dimensions?.dimensionSizes }
@@ -1146,10 +1151,17 @@ export default function DimensionsPanel( {
 				>
 					<DimensionControl
 						label={ __( 'Width' ) }
-						value={ localWidthValue }
+						// Local-then-inherited, so the unit parses from the
+						// inherited value rather than defaulting to px.
+						value={ localWidthValue ?? inheritedWidthValue }
 						onChange={ setWidthValue }
 						placeholder={
-							isWidthPlaceholder ? inheritedWidthValue : undefined
+							isWidthPlaceholder
+								? // The input renders the number as is.
+									( getNumericPlaceholder(
+										inheritedWidthValue
+									) as unknown as string )
+								: undefined
 						}
 						dimensionSizes={ dimensions?.dimensionSizes }
 					/>
