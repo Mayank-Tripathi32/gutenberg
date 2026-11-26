@@ -1,6 +1,6 @@
 import { __ } from '@wordpress/i18n';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { useRef, useMemo } from '@wordpress/element';
+import { useMemo } from '@wordpress/element';
 import { create, getTextContent } from '@wordpress/rich-text';
 import {
 	store as blockEditorStore,
@@ -159,8 +159,6 @@ export default function DocumentOutline( {
 		);
 	}, [] );
 
-	const prevHeadingLevelRef = useRef( 1 );
-
 	const headings = useMemo(
 		() => computeOutlineHeadings( blocks ),
 		[ blocks ]
@@ -224,11 +222,13 @@ export default function DocumentOutline( {
 						{ title }
 					</DocumentOutlineItem>
 				) }
-				{ headings.map( ( item ) => {
+				{ headings.map( ( item, index ) => {
 					// Headings remain the same, go up by one, or down by any amount.
-					// Otherwise there are missing levels.
-					const isIncorrectLevel =
-						item.level > prevHeadingLevelRef.current + 1;
+					// Otherwise there are missing levels. The first heading is
+					// compared with level 1.
+					const prevHeadingLevel =
+						index > 0 ? headings[ index - 1 ].level : 1;
+					const isIncorrectLevel = item.level > prevHeadingLevel + 1;
 
 					const isValid =
 						! item.isEmpty &&
@@ -236,7 +236,6 @@ export default function DocumentOutline( {
 						!! item.level &&
 						( item.level !== 1 ||
 							( ! hasMultipleH1 && ! hasTitle ) );
-					prevHeadingLevelRef.current = item.level;
 
 					return (
 						<DocumentOutlineItem

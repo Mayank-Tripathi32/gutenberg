@@ -12,6 +12,7 @@
 
 ### Bug Fixes
 
+-   `DocumentOutline`: Flag the first heading when it skips a level, such as an H3 straight after the title. The check compared it with the last heading of the previous render instead.
 -   Notes: Keep note forms open when Escape is pressed during IME composition ([#87352](https://github.com/WordPress/gutenberg/pull/87352)).
 -   Document Overview, Notes: Use `Highlight` and `HighlightText` for the pressed header buttons and reactions in forced colors mode, so they follow the active contrast theme in Chromium ([#87010](https://github.com/WordPress/gutenberg/pull/87010)).
 -   `PageAttributesPanel`: Hide parent controls for non-hierarchical post types ([#85679](https://github.com/WordPress/gutenberg/pull/85679)).
